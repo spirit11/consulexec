@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows.Input;
 using ConsulExec.Domain;
 using Splat;
@@ -24,8 +25,7 @@ namespace ConsulExec.ViewModel
         public ProfileEditorViewModel(
             ProfileViewModel Options,
             IActivatingViewModel Activator,
-            IObservable<string[]> NodesSource,
-            Action<ProfileViewModel> OnDelete = null)
+            IObservable<string[]> NodesSource)
         {
             options = Options;
 
@@ -43,11 +43,7 @@ namespace ConsulExec.ViewModel
                 Deactivate(Activator);
             });
 
-            deleteCommand = ReactiveCommand.Create(() =>
-            {
-                Deactivate(Activator);
-                OnDelete?.Invoke(Options);
-            }, Observable.Return(OnDelete != null));
+            deleteCommand = ReactiveCommand.Create(() => Deactivate(Activator), canDelete);
 
             namesSubscription = NodesSource
                 .StartWith(Enumerable.Repeat(new string[0], 1)) // initial values until first request is completed
@@ -81,7 +77,7 @@ namespace ConsulExec.ViewModel
         private readonly ReactiveCommand<Unit, Unit> cancelCommand;
 
         public ICommand DeleteCommand => deleteCommand;
-        private readonly ReactiveCommand deleteCommand;
+        private readonly ReactiveCommand<Unit, Unit> deleteCommand;
 
         public ProfileEditorViewModel HandlingOk(Action<ProfileViewModel> Handler) =>
             AddHandler(okCommand, Handler);
@@ -89,8 +85,15 @@ namespace ConsulExec.ViewModel
         public ProfileEditorViewModel HandlingCancel(Action<ProfileViewModel> Handler) =>
             AddHandler(cancelCommand, Handler);
 
+        public ProfileEditorViewModel HandlingDelete(Action<ProfileViewModel> Handler)
+        {
+            canDelete.OnNext(true);
+            return AddHandler(deleteCommand, Handler);
+        }
+
         private readonly ProfileViewModel options;
         private readonly IDisposable namesSubscription;
+        private BehaviorSubject<bool> canDelete = new BehaviorSubject<bool>(false);
 
         private void Map(SequentialStartupOptions Options)
         {

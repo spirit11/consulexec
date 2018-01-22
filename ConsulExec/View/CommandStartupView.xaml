@@ -13,11 +13,11 @@
     </UserControl.InputBindings>
     <StackPanel>
         <DockPanel>
-            <Label Content="Profile:"/>
-            <Button Command="{Binding EditStartupOptionsCommand}" Content="Edit" DockPanel.Dock="Right"/>
-            <Button Command="{Binding DeleteStartupOptionsCommand}" Content="Delete" DockPanel.Dock="Right"/>
-            <Button Command="{Binding AddStartupOptionsCommand}" Content="Add" DockPanel.Dock="Right"/>
-            <ComboBox Name="lbProfile" ItemsSource="{Binding Profiles}" SelectedItem="{Binding Profile}" DisplayMemberPath="Name" />
+            <Label Content="Execution Profile:"/>
+            <Button Command="{Binding Profiles.EditCommand}" Content="Edit" DockPanel.Dock="Right"/>
+            <Button Command="{Binding Profiles.DeleteCommand}" Content="Delete" DockPanel.Dock="Right"/>
+            <Button Command="{Binding Profiles.AddCommand}" Content="Add" DockPanel.Dock="Right"/>
+            <ComboBox ItemsSource="{Binding Profiles.List}" SelectedItem="{Binding Profiles.Profile}" DisplayMemberPath="Name" />
         </DockPanel>
         <DockPanel>
             <Button Command="{Binding ExecuteCommand}" Content="Execute" DockPanel.Dock="Right"/>

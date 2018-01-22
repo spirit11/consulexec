@@ -117,6 +117,7 @@
     <Compile Include="ViewModel\NodeSelectorViewModel.cs" />
     <Compile Include="Domain\StartupOptions.cs" />
     <Compile Include="ViewModel\ProfileEditorViewModel.cs" />
+    <Compile Include="ViewModel\ProfilesViewModel.cs" />
     <Compile Include="ViewModel\ProfileViewModel.cs" />
     <Compile Include="ViewModel\UndoListViewModel.cs" />
     <Compile Include="View\CommandRunView.xaml.cs">
