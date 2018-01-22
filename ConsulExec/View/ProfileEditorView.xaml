@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="ConsulExec.View.ProfileEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ConsulExec.View"
+             xmlns:vm="clr-namespace:ConsulExec.ViewModel"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:ProfileEditorViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top"/>
+        <ListBox ItemsSource="{Binding Nodes}" Margin="0,27,0,60">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="vm:NodeSelectorViewModel">
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding IsChecked}"/>
+                        <TextBlock Text="{Binding Name}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsAbsent}" Value="True">
+                                            <Setter Property="Foreground" Value="Gray"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <UniformGrid Margin="10,0,10,10" Rows="1" Height="45" VerticalAlignment="Bottom">
+            <Button Command="{Binding OkCommand}" Content="Ok"/>
+            <Button Command="{Binding CancelCommand}" Content="Cancel"/>
+            <Button Command="{Binding DeleteCommand}" Content="Delete"/>
+        </UniformGrid>
+    </Grid>
+</UserControl>
