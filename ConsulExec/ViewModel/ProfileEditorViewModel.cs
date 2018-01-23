@@ -11,7 +11,15 @@ using Splat;
 
 namespace ConsulExec.ViewModel
 {
-    public class ProfileEditorViewModel : ReactiveObject
+    public interface IProfileEditorViewModel<out T>
+    {
+        IProfileEditorViewModel<T> HandlingOk(Action<T> Handler);
+        IProfileEditorViewModel<T> HandlingCancel(Action<T> Handler);
+        IProfileEditorViewModel<T> HandlingDelete(Action<T> Handler);
+    }
+
+
+    public class ProfileEditorViewModel : ReactiveObject, IProfileEditorViewModel<ProfileViewModel<StartupOptions>>
     {
         public ProfileEditorViewModel()
         {
@@ -23,27 +31,28 @@ namespace ConsulExec.ViewModel
         }
 
         public ProfileEditorViewModel(
-            ProfileViewModel Options,
+            ProfileViewModel<StartupOptions> Options,
             IActivatingViewModel Activator,
             IObservable<string[]> NodesSource)
         {
             options = Options;
+            activator = Activator;
 
             Map(Options.Options);
 
             okCommand = ReactiveCommand.Create(() =>
             {
                 MapBack(Options.Options);
-                Deactivate(Activator);
+                Deactivate();
             }, this.WhenAnyValue(v => v.Name, s => !string.IsNullOrWhiteSpace(s)));
 
             cancelCommand = ReactiveCommand.Create(() =>
             {
                 Map(Options.Options);
-                Deactivate(Activator);
+                Deactivate();
             });
 
-            deleteCommand = ReactiveCommand.Create(() => Deactivate(Activator), canDelete);
+            deleteCommand = ReactiveCommand.Create(Deactivate, canDelete);
 
             namesSubscription = NodesSource
                 .StartWith(Enumerable.Repeat(new string[0], 1)) // initial values until first request is completed
@@ -79,23 +88,24 @@ namespace ConsulExec.ViewModel
         public ICommand DeleteCommand => deleteCommand;
         private readonly ReactiveCommand<Unit, Unit> deleteCommand;
 
-        public ProfileEditorViewModel HandlingOk(Action<ProfileViewModel> Handler) =>
+        public IProfileEditorViewModel<ProfileViewModel<StartupOptions>> HandlingOk(Action<ProfileViewModel<StartupOptions>> Handler) =>
             AddHandler(okCommand, Handler);
 
-        public ProfileEditorViewModel HandlingCancel(Action<ProfileViewModel> Handler) =>
+        public IProfileEditorViewModel<ProfileViewModel<StartupOptions>> HandlingCancel(Action<ProfileViewModel<StartupOptions>> Handler) =>
             AddHandler(cancelCommand, Handler);
 
-        public ProfileEditorViewModel HandlingDelete(Action<ProfileViewModel> Handler)
+        public IProfileEditorViewModel<ProfileViewModel<StartupOptions>> HandlingDelete(Action<ProfileViewModel<StartupOptions>> Handler)
         {
             canDelete.OnNext(true);
             return AddHandler(deleteCommand, Handler);
         }
 
-        private readonly ProfileViewModel options;
+        private readonly ProfileViewModel<StartupOptions> options;
         private readonly IDisposable namesSubscription;
-        private BehaviorSubject<bool> canDelete = new BehaviorSubject<bool>(false);
+        private readonly BehaviorSubject<bool> canDelete = new BehaviorSubject<bool>(false);
+        private readonly IActivatingViewModel activator;
 
-        private void Map(SequentialStartupOptions Options)
+        private void Map(StartupOptions Options)
         {
             Name = Options.Name;
             Nodes = new ObservableCollection<NodeSelectorViewModel>(
@@ -103,22 +113,22 @@ namespace ConsulExec.ViewModel
                     .Select(n => new NodeSelectorViewModel(n) { IsChecked = true }));
         }
 
-        private void MapBack(SequentialStartupOptions Options)
+        private void MapBack(StartupOptions Options)
         {
             Options.Name = Name;
-            Options.SetNodes(Nodes.Where(n => n.IsChecked).Select(n => n.Name).ToArray());
+            ((SequentialStartupOptions)Options).SetNodes(Nodes.Where(n => n.IsChecked).Select(n => n.Name).ToArray());
         }
 
-        private ProfileEditorViewModel AddHandler(IObservable<Unit> Command, Action<ProfileViewModel> Handler)
+        private ProfileEditorViewModel AddHandler(IObservable<Unit> Command, Action<ProfileViewModel<StartupOptions>> Handler)
         {
             Command.Subscribe(_ => Handler(options));
             return this;
         }
 
-        private void Deactivate(IActivatingViewModel Activator)
+        private void Deactivate()
         {
             namesSubscription.Dispose();
-            Activator?.Deactivate(this);
+            activator?.Deactivate(this);
         }
     }
 }

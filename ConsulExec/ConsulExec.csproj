@@ -119,6 +119,7 @@
     <Compile Include="ViewModel\ProfileEditorViewModel.cs" />
     <Compile Include="ViewModel\ProfilesViewModel.cs" />
     <Compile Include="ViewModel\ProfileViewModel.cs" />
+    <Compile Include="ViewModel\StartupOptionsProfileViewModel.cs" />
     <Compile Include="ViewModel\UndoListViewModel.cs" />
     <Compile Include="View\CommandRunView.xaml.cs">
       <DependentUpon>CommandRunView.xaml</DependentUpon>

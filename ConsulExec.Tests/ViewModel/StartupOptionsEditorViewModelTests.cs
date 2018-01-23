@@ -14,7 +14,7 @@ namespace ConsulExec.Tests.ViewModel
         {
             var nodes = new Subject<string[]>();
             var target =
-                new ProfileEditorViewModel(new ProfileViewModel(new SequentialStartupOptions(new string[0]) { Name = "opt" }) , null, NodesSource: nodes);
+                new ProfileEditorViewModel(StartupOptionsProfileViewModel.Create(new SequentialStartupOptions(new string[0]) { Name = "opt" }) , null, NodesSource: nodes);
 
             Expect(target.Nodes, Is.Empty);
 
@@ -39,10 +39,10 @@ namespace ConsulExec.Tests.ViewModel
         [SetUp]
         public void SetUp()
         {
-            profileViewModel = new ProfileViewModel(new SequentialStartupOptions(nodeNames) {Name = OldName} );
+            startupOptionsProfileViewModel = StartupOptionsProfileViewModel.Create(new SequentialStartupOptions(nodeNames) {Name = OldName} );
             nodesSource =
                 new BehaviorSubject<string[]>(nodeNames.Where(nn => !absentNodeNames.Contains(nn)).ToArray());
-            target = new ProfileEditorViewModel(profileViewModel,
+            target = new ProfileEditorViewModel(startupOptionsProfileViewModel,
                 null,
                 NodesSource: nodesSource);
 
@@ -68,7 +68,7 @@ namespace ConsulExec.Tests.ViewModel
             target.CancelCommand.Execute(null);
 
             Expect(target.Name, EqualTo(OldName));
-            Expect(profileViewModel.Options.Nodes, EquivalentTo(nodeNames));
+            Expect(startupOptionsProfileViewModel.Options.Nodes, EquivalentTo(nodeNames));
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace ConsulExec.Tests.ViewModel
             target.OkCommand.Execute(null);
 
             Expect(target.Name, EqualTo(NewName));
-            Expect(profileViewModel.Options.Nodes, EquivalentTo(selectedNodeNames));
+            Expect(startupOptionsProfileViewModel.Options.Nodes, EquivalentTo(selectedNodeNames));
         }
 
         private const string OldName = "old";
@@ -87,7 +87,7 @@ namespace ConsulExec.Tests.ViewModel
         private readonly string[] selectedNodeNames = { "1", "3" };
         private readonly string[] absentNodeNames = { "1", "2" };
 
-        private ProfileViewModel profileViewModel;
+        private ProfileViewModel<StartupOptions> startupOptionsProfileViewModel;
         private ProfileEditorViewModel target;
         private BehaviorSubject<string[]> nodesSource;
     }

@@ -1,22 +1,24 @@
-﻿using ConsulExec.Domain;
+﻿using System;
 using ReactiveUI;
 
 namespace ConsulExec.ViewModel
 {
-    public class ProfileViewModel : ReactiveObject
+    public class ProfileViewModel<T> : ReactiveObject
     {
-        public ProfileViewModel(SequentialStartupOptions SequentialStartupOptions)
+        public ProfileViewModel(T Profile, Func<T, string> NameFormatter)
         {
-            Options = SequentialStartupOptions;
+            nameFormatter = NameFormatter;
+            Options = Profile;
         }
 
-        public SequentialStartupOptions Options
+        public T Options
         {
             get { return options; }
             set { options = value; this.RaisePropertyChanged(nameof(Name)); }
         }
-        private SequentialStartupOptions options;
+        private T options;
 
-        public string Name => Options.Name;
+        public string Name => nameFormatter(Options);
+        private readonly Func<T, string> nameFormatter;
     }
 }

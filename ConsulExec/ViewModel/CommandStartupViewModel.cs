@@ -18,9 +18,9 @@ namespace ConsulExec.ViewModel
         public CommandRunViewModel RunCommand(StartupOptions StartupOptions, string Command) =>
             runCommand(StartupOptions, Command);
 
-        public void EditProfile(ProfileViewModel ProfileViewModel, Action<ProfileEditorViewModel> SetupEditor)
+        public void EditProfile(ProfileViewModel<StartupOptions> StartupOptionsProfileViewModel, Action<ProfileEditorViewModel> SetupEditor)
         {
-            var profileEditorViewModel = new ProfileEditorViewModel(ProfileViewModel, activator,
+            var profileEditorViewModel = new ProfileEditorViewModel(StartupOptionsProfileViewModel, activator,
                 Locator.Current.GetService<IRemoteExecution>().Nodes);
             SetupEditor(profileEditorViewModel);
             activator?.Activate(profileEditorViewModel);
@@ -35,7 +35,7 @@ namespace ConsulExec.ViewModel
     {
         public CommandStartupViewModel(CommandStartupSuccesorsFabric CommandStartupSuccesorsFabric, IActivatingViewModel Activator = null)
         {
-            Profiles = new ProfilesViewModel(CommandStartupSuccesorsFabric);
+            Profiles = new ProfilesViewModel(CommandStartupSuccesorsFabric.EditProfile);
 
             ExecuteCommand = ReactiveCommand.Create(() =>
             {
@@ -56,7 +56,7 @@ namespace ConsulExec.ViewModel
                 RecentCommands.Add("ping ya.ru");
             }
 
-            Profiles.List.Add(new ProfileViewModel(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt" }));
+            Profiles.List.Add(StartupOptionsProfileViewModel.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt" }));
             Profiles.Profile = Profiles.List.First();
 #endif
         }
