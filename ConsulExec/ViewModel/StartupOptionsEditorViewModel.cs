@@ -19,9 +19,9 @@ namespace ConsulExec.ViewModel
     }
 
 
-    public class ProfileEditorViewModel : ReactiveObject, IProfileEditorViewModel<ProfileViewModel<StartupOptions>>
+    public class StartupOptionsEditorViewModel : ReactiveObject, IProfileEditorViewModel<ProfileViewModel<StartupOptions>>
     {
-        public ProfileEditorViewModel()
+        public StartupOptionsEditorViewModel()
         {
             if (!ModeDetector.InDesignMode())
                 throw new InvalidOperationException("Design only constructor");
@@ -30,7 +30,7 @@ namespace ConsulExec.ViewModel
             Nodes.Add(new NodeSelectorViewModel("Absent") { IsAbsent = true });
         }
 
-        public ProfileEditorViewModel(
+        public StartupOptionsEditorViewModel(
             ProfileViewModel<StartupOptions> Options,
             IActivatingViewModel Activator,
             IObservable<string[]> NodesSource)
@@ -119,7 +119,7 @@ namespace ConsulExec.ViewModel
             ((SequentialStartupOptions)Options).SetNodes(Nodes.Where(n => n.IsChecked).Select(n => n.Name).ToArray());
         }
 
-        private ProfileEditorViewModel AddHandler(IObservable<Unit> Command, Action<ProfileViewModel<StartupOptions>> Handler)
+        private StartupOptionsEditorViewModel AddHandler(IObservable<Unit> Command, Action<ProfileViewModel<StartupOptions>> Handler)
         {
             Command.Subscribe(_ => Handler(options));
             return this;

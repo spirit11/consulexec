@@ -6,15 +6,15 @@ namespace ConsulExec.View
     /// <summary>
     /// Interaction logic for StartupOptionsView.xaml
     /// </summary>
-    public partial class ProfileEditorView : IViewFor<ProfileEditorViewModel>
+    public partial class StartupOptionsEditorView : IViewFor<StartupOptionsEditorViewModel>
     {
-        public ProfileEditorView()
+        public StartupOptionsEditorView()
         {
             InitializeComponent();
         }
-        public ProfileEditorViewModel ViewModel
+        public StartupOptionsEditorViewModel ViewModel
         {
-            get { return (ProfileEditorViewModel)DataContext; }
+            get { return (StartupOptionsEditorViewModel)DataContext; }
             set { DataContext = value; }
         }
 

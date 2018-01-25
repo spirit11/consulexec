@@ -9,33 +9,27 @@ namespace ConsulExec.ViewModel
 {
     public class CommandStartupSuccesorsFabric
     {
-        public CommandStartupSuccesorsFabric(Func<StartupOptions, string, CommandRunViewModel> RunCommand, IActivatingViewModel Activator)
-        {
-            runCommand = RunCommand;
-            activator = Activator;
-        }
+        public static ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate EditProfile(IActivatingViewModel ActivatingViewModel) =>
+            (vm, setup) => EditProfile(ActivatingViewModel, vm, setup);
 
-        public CommandRunViewModel RunCommand(StartupOptions StartupOptions, string Command) =>
-            runCommand(StartupOptions, Command);
-
-        public void EditProfile(ProfileViewModel<StartupOptions> StartupOptionsProfileViewModel, Action<ProfileEditorViewModel> SetupEditor)
+        public static void EditProfile(IActivatingViewModel ActivatingViewModel, ProfileViewModel<StartupOptions> StartupOptionsProfileViewModel, Action<StartupOptionsEditorViewModel> SetupEditor)
         {
-            var profileEditorViewModel = new ProfileEditorViewModel(StartupOptionsProfileViewModel, activator,
+            var profileEditorViewModel = new StartupOptionsEditorViewModel(StartupOptionsProfileViewModel, ActivatingViewModel,
                 Locator.Current.GetService<IRemoteExecution>().Nodes);
             SetupEditor(profileEditorViewModel);
-            activator?.Activate(profileEditorViewModel);
+            ActivatingViewModel?.Activate(profileEditorViewModel);
         }
-
-        private readonly Func<StartupOptions, string, CommandRunViewModel> runCommand;
-        private readonly IActivatingViewModel activator;
     }
 
 
     public class CommandStartupViewModel : ReactiveObject
     {
-        public CommandStartupViewModel(CommandStartupSuccesorsFabric CommandStartupSuccesorsFabric, IActivatingViewModel Activator = null)
+        public CommandStartupViewModel(ConnectionProfilesViewModel ConnectionProfilesViewModel,
+            StartupOptionsProfilesViewModel StartupOptionsProfilesViewModel,
+            Action<StartupOptions, string> RunCommand)
         {
-            Profiles = new ProfilesViewModel(CommandStartupSuccesorsFabric.EditProfile);
+            ConnectionProfiles = ConnectionProfilesViewModel;
+            StartupOptionsProfiles = StartupOptionsProfilesViewModel;
 
             ExecuteCommand = ReactiveCommand.Create(() =>
             {
@@ -43,22 +37,10 @@ namespace ConsulExec.ViewModel
                 RecentCommands.Remove(cmd);
                 RecentCommands.Add(cmd);
                 Command = cmd;
-                Activator?.Activate(CommandStartupSuccesorsFabric.RunCommand(Profiles.Profile.Options, cmd));
-            }, this.WhenAnyValue(v => v.Command, v => v.Profiles.Profile, (cmd, opt) => !string.IsNullOrWhiteSpace(cmd) && opt != null));
+                RunCommand?.Invoke(StartupOptionsProfiles.Profile.Options, cmd);
+            }, this.WhenAnyValue(v => v.Command, v => v.StartupOptionsProfiles.Profile, (cmd, opt) => !string.IsNullOrWhiteSpace(cmd) && opt != null));
 
             SetCommandCommand = ReactiveCommand.Create<string>(s => Command = s);
-
-#if DEBUG
-            Command = "echo ok";
-            if (!ModeDetector.InDesignMode())
-            {
-                RecentCommands.Add("echo ok");
-                RecentCommands.Add("ping ya.ru");
-            }
-
-            Profiles.List.Add(StartupOptionsProfileViewModel.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt" }));
-            Profiles.Profile = Profiles.List.First();
-#endif
         }
 
         public string Command { get { return command; } set { this.RaiseAndSetIfChanged(ref command, value); } } // CommandViewModel
@@ -66,7 +48,9 @@ namespace ConsulExec.ViewModel
 
         public ReactiveList<string> RecentCommands { get; } = new ReactiveList<string>();
 
-        public ProfilesViewModel Profiles { get; }
+        public ConnectionProfilesViewModel ConnectionProfiles { get; }
+
+        public StartupOptionsProfilesViewModel StartupOptionsProfiles { get; }
 
         #region Commands
 
@@ -74,7 +58,7 @@ namespace ConsulExec.ViewModel
 
         public ICommand SetCommandCommand { get; }
 
-        public ICommand UndoCommand => Profiles.UndoCommand;
+        public ICommand UndoCommand => StartupOptionsProfiles.UndoCommand;
 
         #endregion
     }

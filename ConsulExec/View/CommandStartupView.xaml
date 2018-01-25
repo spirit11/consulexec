@@ -14,10 +14,10 @@
     <StackPanel>
         <DockPanel>
             <Label Content="Execution Profile:"/>
-            <Button Command="{Binding Profiles.EditCommand}" Content="Edit" DockPanel.Dock="Right"/>
-            <Button Command="{Binding Profiles.DeleteCommand}" Content="Delete" DockPanel.Dock="Right"/>
-            <Button Command="{Binding Profiles.AddCommand}" Content="Add" DockPanel.Dock="Right"/>
-            <ComboBox ItemsSource="{Binding Profiles.List}" SelectedItem="{Binding Profiles.Profile}" DisplayMemberPath="Name" />
+            <Button Command="{Binding StartupOptionsProfiles.EditCommand}" Content="Edit" DockPanel.Dock="Right"/>
+            <Button Command="{Binding StartupOptionsProfiles.DeleteCommand}" Content="Delete" DockPanel.Dock="Right"/>
+            <Button Command="{Binding StartupOptionsProfiles.AddCommand}" Content="Add" DockPanel.Dock="Right"/>
+            <ComboBox ItemsSource="{Binding StartupOptionsProfiles.List}" SelectedItem="{Binding StartupOptionsProfiles.Profile}" DisplayMemberPath="Name" />
         </DockPanel>
         <DockPanel>
             <Button Command="{Binding ExecuteCommand}" Content="Execute" DockPanel.Dock="Right"/>

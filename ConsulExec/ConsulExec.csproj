@@ -53,6 +53,10 @@
       <HintPath>..\packages\Splat.1.4.0\lib\Net45\Splat.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="StructureMap, Version=4.6.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\StructureMap.4.6.1\lib\net45\StructureMap.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -98,6 +102,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Design\FakeTaskRun.cs" />
+    <Compile Include="Domain\ConnectionOptions.cs" />
     <Compile Include="Infrastructure\ConventionalViewLocator.cs" />
     <Compile Include="Design\FakeRemoteExecution.cs" />
     <Compile Include="Domain\RemoteExecution.cs" />
@@ -116,10 +121,11 @@
     <Compile Include="ViewModel\NodeRunViewModel.cs" />
     <Compile Include="ViewModel\NodeSelectorViewModel.cs" />
     <Compile Include="Domain\StartupOptions.cs" />
-    <Compile Include="ViewModel\ProfileEditorViewModel.cs" />
+    <Compile Include="ViewModel\StartupOptionsEditorViewModel.cs" />
     <Compile Include="ViewModel\ProfilesViewModel.cs" />
+    <Compile Include="ViewModel\StartupOptionsProfilesViewModel.cs" />
     <Compile Include="ViewModel\ProfileViewModel.cs" />
-    <Compile Include="ViewModel\StartupOptionsProfileViewModel.cs" />
+    <Compile Include="ViewModel\ProfilesViewModelsFactory.cs" />
     <Compile Include="ViewModel\UndoListViewModel.cs" />
     <Compile Include="View\CommandRunView.xaml.cs">
       <DependentUpon>CommandRunView.xaml</DependentUpon>
@@ -130,8 +136,8 @@
     <Compile Include="View\NodeRunView.xaml.cs">
       <DependentUpon>NodeRunView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\ProfileEditorView.xaml.cs">
-      <DependentUpon>ProfileEditorView.xaml</DependentUpon>
+    <Compile Include="View\StartupOptionsEditorView.xaml.cs">
+      <DependentUpon>StartupOptionsEditorView.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -157,7 +163,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\ProfileEditorView.xaml">
+    <Page Include="View\StartupOptionsEditorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

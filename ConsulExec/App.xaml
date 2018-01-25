@@ -7,8 +7,8 @@
         <DataTemplate DataType="{x:Type vm:CommandStartupViewModel}">
             <v:CommandStartupView/>
         </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ProfileEditorViewModel}">
-            <v:ProfileEditorView/>
+        <DataTemplate DataType="{x:Type vm:StartupOptionsEditorViewModel}">
+            <v:StartupOptionsEditorView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:NodeRunViewModel}">
             <v:NodeRunView/>

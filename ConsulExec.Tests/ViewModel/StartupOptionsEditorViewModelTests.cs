@@ -14,7 +14,7 @@ namespace ConsulExec.Tests.ViewModel
         {
             var nodes = new Subject<string[]>();
             var target =
-                new ProfileEditorViewModel(StartupOptionsProfileViewModel.Create(new SequentialStartupOptions(new string[0]) { Name = "opt" }) , null, NodesSource: nodes);
+                new StartupOptionsEditorViewModel(ProfilesViewModelsFactory.Create(new SequentialStartupOptions(new string[0]) { Name = "opt" }) , null, NodesSource: nodes);
 
             Expect(target.Nodes, Is.Empty);
 
@@ -39,10 +39,10 @@ namespace ConsulExec.Tests.ViewModel
         [SetUp]
         public void SetUp()
         {
-            startupOptionsProfileViewModel = StartupOptionsProfileViewModel.Create(new SequentialStartupOptions(nodeNames) {Name = OldName} );
+            startupOptionsProfileViewModel = ProfilesViewModelsFactory.Create(new SequentialStartupOptions(nodeNames) {Name = OldName} );
             nodesSource =
                 new BehaviorSubject<string[]>(nodeNames.Where(nn => !absentNodeNames.Contains(nn)).ToArray());
-            target = new ProfileEditorViewModel(startupOptionsProfileViewModel,
+            target = new StartupOptionsEditorViewModel(startupOptionsProfileViewModel,
                 null,
                 NodesSource: nodesSource);
 
@@ -88,7 +88,7 @@ namespace ConsulExec.Tests.ViewModel
         private readonly string[] absentNodeNames = { "1", "2" };
 
         private ProfileViewModel<StartupOptions> startupOptionsProfileViewModel;
-        private ProfileEditorViewModel target;
+        private StartupOptionsEditorViewModel target;
         private BehaviorSubject<string[]> nodesSource;
     }
 }

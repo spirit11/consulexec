@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="ConsulExec.View.ProfileEditorView"
+﻿<UserControl x:Class="ConsulExec.View.StartupOptionsEditorView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,11 +6,26 @@
              xmlns:local="clr-namespace:ConsulExec.View"
              xmlns:vm="clr-namespace:ConsulExec.ViewModel"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance vm:ProfileEditorViewModel, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance vm:StartupOptionsEditorViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top"/>
-        <ListBox ItemsSource="{Binding Nodes}" Margin="0,27,0,60">
+    <DockPanel>
+        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Top"/>
+
+        <DockPanel DockPanel.Dock="Top">
+            <Label Content="Execution Profile:"/>
+            <Button Command="{Binding EditCommand}" Content="Edit" DockPanel.Dock="Right"/>
+            <Button Command="{Binding StartupOptionsProfiles.DeleteCommand}" Content="Delete" DockPanel.Dock="Right"/>
+            <Button Command="{Binding StartupOptionsProfiles.AddCommand}" Content="Add" DockPanel.Dock="Right"/>
+            <ComboBox ItemsSource="{Binding StartupOptionsProfiles.List}" SelectedItem="{Binding StartupOptionsProfiles.Profile}" DisplayMemberPath="Name" />
+        </DockPanel>
+
+        <UniformGrid Margin="10,0,10,10" Rows="1" Height="45" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
+            <Button Command="{Binding OkCommand}" Content="Ok"/>
+            <Button Command="{Binding CancelCommand}" Content="Cancel"/>
+            <Button Command="{Binding DeleteCommand}" Content="Delete"/>
+        </UniformGrid>
+
+        <ListBox ItemsSource="{Binding Nodes}" Margin="12">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="vm:NodeSelectorViewModel">
                     <StackPanel Orientation="Horizontal">
@@ -30,10 +45,5 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <UniformGrid Margin="10,0,10,10" Rows="1" Height="45" VerticalAlignment="Bottom">
-            <Button Command="{Binding OkCommand}" Content="Ok"/>
-            <Button Command="{Binding CancelCommand}" Content="Cancel"/>
-            <Button Command="{Binding DeleteCommand}" Content="Delete"/>
-        </UniformGrid>
-    </Grid>
+    </DockPanel>
 </UserControl>

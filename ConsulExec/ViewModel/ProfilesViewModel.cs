@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
-using ConsulExec.Domain;
 using ReactiveUI;
 
 namespace ConsulExec.ViewModel
@@ -21,8 +20,9 @@ namespace ConsulExec.ViewModel
         public T Profile { get { return profile; } set { this.RaiseAndSetIfChanged(ref profile, value); } }
         private T profile;
 
-        protected ProfilesViewModel(EditProfileDelegate EditProfile)
+        protected ProfilesViewModel(EditProfileDelegate EditProfile, UndoListViewModel UndoList)
         {
+            undoList = UndoList;
             var startupOptionsNotNull = this.WhenAnyValue(v => v.Profile).Select(v => v != null);
 
             DeleteCommand = ReactiveCommand.Create(() => RemoveProfile(Profile, true), startupOptionsNotNull);
@@ -57,7 +57,7 @@ namespace ConsulExec.ViewModel
 
         protected abstract object Backup(T EditProfile);
 
-        private readonly UndoListViewModel undoList = new UndoListViewModel();
+        private readonly UndoListViewModel undoList;
 
         private void RemoveProfile(T RemovedOptions, bool AddToUndo)
         {
@@ -76,23 +76,5 @@ namespace ConsulExec.ViewModel
                 Profile = List.FirstOrDefault(v => !v.Equals(RemovedOptions));
             List.Remove(RemovedOptions);
         }
-    }
-
-
-    public class ProfilesViewModel : ProfilesViewModel<ProfileViewModel<StartupOptions>>
-    {
-        public ProfilesViewModel(EditProfileDelegate EditProfile)
-            : base(EditProfile)
-        {
-        }
-
-        protected override ProfileViewModel<StartupOptions> CreateProfile(string NewName) =>
-            StartupOptionsProfileViewModel.Create(new SequentialStartupOptions(new string[0]) { Name = NewName });
-
-        protected override void Restore(ProfileViewModel<StartupOptions> EditStartupOptionsProfile, object O) =>
-            EditStartupOptionsProfile.Options = (SequentialStartupOptions)O;
-
-        protected override object Backup(ProfileViewModel<StartupOptions> EditStartupOptionsProfile) =>
-            EditStartupOptionsProfile.Options.Clone();
     }
 }
