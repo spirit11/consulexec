@@ -1,4 +1,5 @@
 ﻿using ConsulExec.Domain;
+using ReactiveUI;
 
 namespace ConsulExec.ViewModel
 {
@@ -7,8 +8,8 @@ namespace ConsulExec.ViewModel
         public ConnectionProfilesViewModel ConnectionProfiles { get; }
 
         public StartupOptionsProfilesViewModel(EditProfileDelegate EditProfile, UndoListViewModel UndoList,
-            ConnectionProfilesViewModel ConnectionProfiles)
-            : base(EditProfile, UndoList)
+            ConnectionProfilesViewModel ConnectionProfiles, ReactiveList<ProfileViewModel<StartupOptions>> StartupProfiles)
+            : base(EditProfile, UndoList, StartupProfiles)
         {
             this.ConnectionProfiles = ConnectionProfiles;
         }
@@ -26,7 +27,7 @@ namespace ConsulExec.ViewModel
     public class ConnectionProfilesViewModel : ProfilesViewModel<ProfileViewModel<ConnectionOptions>>
     {
         public ConnectionProfilesViewModel(EditProfileDelegate EditProfile, UndoListViewModel UndoList)
-            : base(EditProfile, UndoList)
+            : base(EditProfile, UndoList, new ReactiveList<ProfileViewModel<ConnectionOptions>>())
         {
         }
 

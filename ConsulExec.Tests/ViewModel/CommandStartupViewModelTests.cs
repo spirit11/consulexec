@@ -4,6 +4,7 @@ using System.Linq;
 using ConsulExec.Domain;
 using ConsulExec.ViewModel;
 using NUnit.Framework;
+using ReactiveUI;
 
 namespace ConsulExec.Tests.ViewModel
 {
@@ -19,7 +20,7 @@ namespace ConsulExec.Tests.ViewModel
         public void AddRecentCommandWhenExecuted()
         {
             var target = new CommandStartupViewModel(new ConnectionProfilesViewModel(null, null),
-                new StartupOptionsProfilesViewModel(null, null, null), (o, cmd) => { });
+                new StartupOptionsProfilesViewModel(null, null, null, new ReactiveList<ProfileViewModel<StartupOptions>>()), (o, cmd) => { });
 
             target.RecentCommands.Clear();
             target.Command = "42";
@@ -47,7 +48,7 @@ namespace ConsulExec.Tests.ViewModel
         {
             var cmds = new List<dynamic>();
             var options = new SequentialStartupOptions(new string[0]);
-            var startupOptionsProfilesViewModel = new StartupOptionsProfilesViewModel(null, null, null)
+            var startupOptionsProfilesViewModel = new StartupOptionsProfilesViewModel(null, null, null, new ReactiveList<ProfileViewModel<StartupOptions>>())
             {
                 Profile = new ProfileViewModel<StartupOptions>(options, o => o.Name)
             };

@@ -101,6 +101,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DefaultInterfaceImplementationPolicy.cs" />
     <Compile Include="Design\FakeTaskRun.cs" />
     <Compile Include="Domain\ConnectionOptions.cs" />
     <Compile Include="Infrastructure\ConventionalViewLocator.cs" />
@@ -115,6 +116,8 @@
     <Compile Include="Infrastructure\ObservableExt.cs" />
     <Compile Include="Infrastructure\RetryPatterns.cs" />
     <Compile Include="Infrastructure\TaskExtensions.cs" />
+    <Compile Include="RuntimeRegistry.cs" />
+    <Compile Include="StructureMapToSplatLocatorAdapter.cs" />
     <Compile Include="ViewModel\CommandRunViewModel.cs" />
     <Compile Include="ViewModel\CommandStartupViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />

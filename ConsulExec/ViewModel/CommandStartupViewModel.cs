@@ -7,12 +7,14 @@ using Splat;
 
 namespace ConsulExec.ViewModel
 {
-    public class CommandStartupSuccesorsFabric
+    public class EditorsFabric
     {
-        public static ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate EditProfile(IActivatingViewModel ActivatingViewModel) =>
-            (vm, setup) => EditProfile(ActivatingViewModel, vm, setup);
+        public static ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate EditStartupOptions(IActivatingViewModel ActivatingViewModel) =>
+            (vm, setup) => EditStartupOptions(ActivatingViewModel, vm, setup);
 
-        public static void EditProfile(IActivatingViewModel ActivatingViewModel, ProfileViewModel<StartupOptions> StartupOptionsProfileViewModel, Action<StartupOptionsEditorViewModel> SetupEditor)
+        public static void EditStartupOptions(IActivatingViewModel ActivatingViewModel, 
+            ProfileViewModel<StartupOptions> StartupOptionsProfileViewModel, 
+            Action<StartupOptionsEditorViewModel> SetupEditor)
         {
             var profileEditorViewModel = new StartupOptionsEditorViewModel(StartupOptionsProfileViewModel, ActivatingViewModel,
                 Locator.Current.GetService<IRemoteExecution>().Nodes);

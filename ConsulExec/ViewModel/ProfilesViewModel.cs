@@ -10,7 +10,7 @@ namespace ConsulExec.ViewModel
     {
         public delegate void EditProfileDelegate(T Profile, Action<IProfileEditorViewModel<T>> EditorSetup);
 
-        public ReactiveList<T> List { get; } = new ReactiveList<T>();
+        public ReactiveList<T> List { get; }
 
         public ICommand AddCommand { get; }
         public ICommand DeleteCommand { get; }
@@ -20,9 +20,10 @@ namespace ConsulExec.ViewModel
         public T Profile { get { return profile; } set { this.RaiseAndSetIfChanged(ref profile, value); } }
         private T profile;
 
-        protected ProfilesViewModel(EditProfileDelegate EditProfile, UndoListViewModel UndoList)
+        protected ProfilesViewModel(EditProfileDelegate EditProfile, UndoListViewModel UndoList, ReactiveList<T> Profiles)
         {
             undoList = UndoList;
+            List = Profiles;
             var startupOptionsNotNull = this.WhenAnyValue(v => v.Profile).Select(v => v != null);
 
             DeleteCommand = ReactiveCommand.Create(() => RemoveProfile(Profile, true), startupOptionsNotNull);
