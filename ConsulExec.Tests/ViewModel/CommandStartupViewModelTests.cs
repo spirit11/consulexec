@@ -19,7 +19,7 @@ namespace ConsulExec.Tests.ViewModel
         [Test]
         public void AddRecentCommandWhenExecuted()
         {
-            var target = new CommandStartupViewModel(new ConnectionProfilesViewModel(null, null),
+            var target = new CommandStartupViewModel(new ConnectionProfilesViewModel(null, null, null),
                 new StartupOptionsProfilesViewModel(null, null, null, new ReactiveList<ProfileViewModel<StartupOptions>>()), (o, cmd) => { });
 
             target.RecentCommands.Clear();
@@ -52,7 +52,7 @@ namespace ConsulExec.Tests.ViewModel
             {
                 Profile = new ProfileViewModel<StartupOptions>(options, o => o.Name)
             };
-            var target = new CommandStartupViewModel(new ConnectionProfilesViewModel(null, null),
+            var target = new CommandStartupViewModel(new ConnectionProfilesViewModel(null, null, null),
                 startupOptionsProfilesViewModel,
                 (o, cmd) => cmds.Add(new { o, cmd }));
 

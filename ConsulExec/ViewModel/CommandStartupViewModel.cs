@@ -1,6 +1,5 @@
 ﻿using ReactiveUI;
 using System;
-using System.Linq;
 using System.Windows.Input;
 using ConsulExec.Domain;
 using Splat;
@@ -9,18 +8,25 @@ namespace ConsulExec.ViewModel
 {
     public class EditorsFabric
     {
-        public static ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate EditStartupOptions(IActivatingViewModel ActivatingViewModel) =>
-            (vm, setup) => EditStartupOptions(ActivatingViewModel, vm, setup);
+        public static ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate EditStartupOptions(IActivatingViewModel ActivatingViewModel,
+            ConnectionProfilesViewModel Connections) =>
+            (vm, setup) => EditStartupOptions(ActivatingViewModel, vm, setup, Connections);
 
-        public static void EditStartupOptions(IActivatingViewModel ActivatingViewModel, 
-            ProfileViewModel<StartupOptions> StartupOptionsProfileViewModel, 
-            Action<StartupOptionsEditorViewModel> SetupEditor)
+        public static void EditStartupOptions(IActivatingViewModel ActivatingViewModel,
+            ProfileViewModel<StartupOptions> StartupOptionsProfileViewModel,
+            Action<StartupOptionsEditorViewModel> SetupEditor, ConnectionProfilesViewModel Connections)
         {
-            var profileEditorViewModel = new StartupOptionsEditorViewModel(StartupOptionsProfileViewModel, ActivatingViewModel,
-                Locator.Current.GetService<IRemoteExecution>().Nodes);
+            var profileEditorViewModel = new StartupOptionsEditorViewModel(StartupOptionsProfileViewModel,
+                Connections,
+                ActivatingViewModel,
+                Locator.Current.GetService<IRemoteExecution>().Nodes
+                );
             SetupEditor(profileEditorViewModel);
             ActivatingViewModel?.Activate(profileEditorViewModel);
         }
+
+        public static ProfilesViewModel<ProfileViewModel<ConnectionOptions>>.EditProfileDelegate EditConnectionOptions(IActivatingViewModel GetInstance) =>
+            (vm, setup) => { };
     }
 
 

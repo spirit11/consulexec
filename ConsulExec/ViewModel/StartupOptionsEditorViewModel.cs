@@ -11,6 +11,9 @@ using Splat;
 
 namespace ConsulExec.ViewModel
 {
+    using ConnectionOptionsViewModel = ProfileViewModel<ConnectionOptions>;
+
+
     public interface IProfileEditorViewModel<out T>
     {
         IProfileEditorViewModel<T> HandlingOk(Action<T> Handler);
@@ -32,9 +35,15 @@ namespace ConsulExec.ViewModel
 
         public StartupOptionsEditorViewModel(
             ProfileViewModel<StartupOptions> Options,
+            IProfilesViewModel<ConnectionOptionsViewModel> Connections,
             IActivatingViewModel Activator,
             IObservable<string[]> NodesSource)
         {
+            AssertNotNull(Options, nameof(Options));
+            AssertNotNull(Connections, nameof(Connections));
+            AssertNotNull(NodesSource, nameof(NodesSource));
+
+            this.Connections = Connections;
             options = Options;
             activator = Activator;
 
@@ -74,6 +83,8 @@ namespace ConsulExec.ViewModel
                 });
         }
 
+        public IProfilesViewModel<ConnectionOptionsViewModel> Connections { get; }
+
         public ObservableCollection<NodeSelectorViewModel> Nodes { get; private set; } = new ObservableCollection<NodeSelectorViewModel>();
 
         public string Name { get { return name; } set { this.RaiseAndSetIfChanged(ref name, value); } }
@@ -100,6 +111,13 @@ namespace ConsulExec.ViewModel
             return AddHandler(deleteCommand, Handler);
         }
 
+        private static void AssertNotNull<T>(T Argument, string ArgumentName)
+            where T : class
+        {
+            if (Argument == null)
+                throw new ArgumentNullException(ArgumentName);
+        }
+
         private readonly ProfileViewModel<StartupOptions> options;
         private readonly IDisposable namesSubscription;
         private readonly BehaviorSubject<bool> canDelete = new BehaviorSubject<bool>(false);
@@ -111,12 +129,14 @@ namespace ConsulExec.ViewModel
             Nodes = new ObservableCollection<NodeSelectorViewModel>(
                 (Options.Nodes ?? Enumerable.Empty<string>())
                     .Select(n => new NodeSelectorViewModel(n) { IsChecked = true }));
+            Connections.Profile = Connections.List.FirstOrDefault(p => p.Options == Options.Connection);
         }
 
         private void MapBack(StartupOptions Options)
         {
             Options.Name = Name;
             ((SequentialStartupOptions)Options).SetNodes(Nodes.Where(n => n.IsChecked).Select(n => n.Name).ToArray());
+            Options.Connection = Connections.Profile.Options;
         }
 
         private StartupOptionsEditorViewModel AddHandler(IObservable<Unit> Command, Action<ProfileViewModel<StartupOptions>> Handler)

@@ -6,7 +6,14 @@ using ReactiveUI;
 
 namespace ConsulExec.ViewModel
 {
-    public abstract class ProfilesViewModel<T> : ReactiveObject
+    public interface IProfilesViewModel<T>
+    {
+        ReactiveList<T> List { get; }
+        T Profile { get; set; }
+    }
+
+
+    public abstract class ProfilesViewModel<T> : ReactiveObject, IProfilesViewModel<T>
     {
         public delegate void EditProfileDelegate(T Profile, Action<IProfileEditorViewModel<T>> EditorSetup);
 

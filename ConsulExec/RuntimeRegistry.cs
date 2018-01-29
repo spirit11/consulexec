@@ -14,10 +14,12 @@ namespace ConsulExec
             Policies.OnMissingFamily(new DefaultInterfaceImplementationPolicy());
             For<IRemoteExecution>().Use<Design.FakeRemoteExecution>().Singleton();
 
+            ForConcreteType<ReactiveList<ProfileViewModel<ConnectionOptions>>>().Configure.Singleton();
+
             ForConcreteType<ConnectionProfilesViewModel>()
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<ConnectionOptions>>.EditProfileDelegate>()
-                .Is((p, s) => { });
+                .Is(ctxt => EditorsFabric.EditConnectionOptions(ctxt.GetInstance<IActivatingViewModel>()));
 
             ForConcreteType<MainWindowViewModel>().Configure.Singleton();
 
@@ -27,27 +29,13 @@ namespace ConsulExec
             ForConcreteType<StartupOptionsProfilesViewModel>()
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate>()
-                .Is(ctxt => EditorsFabric.EditStartupOptions(ctxt.GetInstance<IActivatingViewModel>()))
+                .Is(ctxt => EditorsFabric.EditStartupOptions(ctxt.GetInstance<IActivatingViewModel>(), ctxt.GetInstance<ConnectionProfilesViewModel>()))
                 .Ctor<ReactiveList<ProfileViewModel<StartupOptions>>>()
                 .Is(new ReactiveList<ProfileViewModel<StartupOptions>>());
 
             ForConcreteType<CommandRunViewModel>();
 
-            For<Action<StartupOptions, string>>().Use("executeCommandHandler",
-                    ctxt =>
-                    {
-                        return new Action<StartupOptions, string>((options, command) =>
-                        {
-                            var executeService = ctxt.GetInstance<IRemoteExecution>();
-                            var tasks = options.Construct(executeService, command);
-                            var mvm = ctxt.GetInstance<IActivatingViewModel>();
-                            mvm.Activate(
-                                new CommandRunViewModel(options.Nodes, tasks, mvm)
-                            //ctxt.GetInstance<Func<string[], IObservable<ITaskRun>, CommandRunViewModel>>()(options.Nodes, tasks)
-                            //ctxt.GetInsta    nce<CommandRunViewModel>()
-                            );
-                        });
-                    })
+            For<Action<StartupOptions, string>>().Use(ctxt => StartCommand(ctxt))
                 .Named("executeCommandHandler");
 
             ForConcreteType<CommandStartupViewModel>()
@@ -57,6 +45,18 @@ namespace ConsulExec
                 .OnCreation(Model => FillTestData(Model));
         }
 
+        private static Action<StartupOptions, string> StartCommand(IContext Context) =>
+            (options, command) =>
+            {
+                var executeService = Context.GetInstance<IRemoteExecution>();
+                var tasks = options.Construct(executeService, command);
+                var mvm = Context.GetInstance<IActivatingViewModel>();
+                mvm.Activate(new CommandRunViewModel(options.Nodes, tasks, mvm)
+                //Context.GetInstance<Func<string[], IObservable<ITaskRun>, CommandRunViewModel>>()(options.Nodes, tasks)
+                //Context.GetInstance<CommandRunViewModel>()
+                );
+            };
+
 
         [Conditional("DEBUG")]
         private static void FillTestData(CommandStartupViewModel CommandStartupViewModel)
@@ -65,12 +65,13 @@ namespace ConsulExec
             CommandStartupViewModel.RecentCommands.Add("echo ok");
             CommandStartupViewModel.RecentCommands.Add("ping ya.ru");
 
-            CommandStartupViewModel.StartupOptionsProfiles.List.Add(
-                ProfilesViewModelsFactory.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt" }));
-            CommandStartupViewModel.StartupOptionsProfiles.Profile = CommandStartupViewModel.StartupOptionsProfiles.List[0];
-
+            var connectionOptions = new ConnectionOptions { Name = "serv2" };
             CommandStartupViewModel.ConnectionProfiles.List.Add(new ProfileViewModel<ConnectionOptions>(new ConnectionOptions { Name = "serv1" }, f => f.Name));
-            CommandStartupViewModel.ConnectionProfiles.List.Add(new ProfileViewModel<ConnectionOptions>(new ConnectionOptions { Name = "serv2" }, f => f.Name));
+            CommandStartupViewModel.ConnectionProfiles.List.Add(new ProfileViewModel<ConnectionOptions>(connectionOptions, f => f.Name));
+
+            CommandStartupViewModel.StartupOptionsProfiles.List.Add(
+                ProfilesViewModelsFactory.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt", Connection = connectionOptions }));
+            CommandStartupViewModel.StartupOptionsProfiles.Profile = CommandStartupViewModel.StartupOptionsProfiles.List[0];
         }
     }
 }

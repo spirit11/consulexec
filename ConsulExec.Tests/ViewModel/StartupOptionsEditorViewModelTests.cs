@@ -2,7 +2,9 @@
 using System.Reactive.Subjects;
 using ConsulExec.Domain;
 using ConsulExec.ViewModel;
+using Moq;
 using NUnit.Framework;
+using ReactiveUI;
 
 namespace ConsulExec.Tests.ViewModel
 {
@@ -13,8 +15,15 @@ namespace ConsulExec.Tests.ViewModel
         public void NodesInfoHandledProperly()
         {
             var nodes = new Subject<string[]>();
-            var target =
-                new StartupOptionsEditorViewModel(ProfilesViewModelsFactory.Create(new SequentialStartupOptions(new string[0]) { Name = "opt" }) , null, NodesSource: nodes);
+
+            var profilesViewModel = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
+                m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>());
+
+            var target = new StartupOptionsEditorViewModel(
+                ProfilesViewModelsFactory.Create(new SequentialStartupOptions(new string[0]) { Name = "opt" }),
+                profilesViewModel,
+                null,
+                nodes);
 
             Expect(target.Nodes, Is.Empty);
 
@@ -39,10 +48,13 @@ namespace ConsulExec.Tests.ViewModel
         [SetUp]
         public void SetUp()
         {
-            startupOptionsProfileViewModel = ProfilesViewModelsFactory.Create(new SequentialStartupOptions(nodeNames) {Name = OldName} );
+            startupOptionsProfileViewModel = ProfilesViewModelsFactory.Create(new SequentialStartupOptions(nodeNames) { Name = OldName });
             nodesSource =
                 new BehaviorSubject<string[]>(nodeNames.Where(nn => !absentNodeNames.Contains(nn)).ToArray());
+            var profilesViewModel = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
+                m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>());
             target = new StartupOptionsEditorViewModel(startupOptionsProfileViewModel,
+                profilesViewModel,
                 null,
                 NodesSource: nodesSource);
 

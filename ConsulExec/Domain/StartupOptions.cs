@@ -8,12 +8,22 @@ namespace ConsulExec.Domain
     public abstract class StartupOptions : ICloneable
     {
         public string Name { get; set; } = "";
+
         public virtual string[] Nodes => Array.Empty<string>();
+
+        public ConnectionOptions Connection { get; set; }
 
         public abstract StartupOptions Clone();
 
         object ICloneable.Clone() => Clone();
+
         public abstract IObservable<ITaskRun> Construct(IRemoteExecution ExecuteService, string Command);
+
+        protected void Fill(StartupOptions Other)
+        {
+            Name = Other.Name;
+            Connection = Other.Connection;
+        }
     }
 
 
@@ -31,7 +41,12 @@ namespace ConsulExec.Domain
             nodes = NewNodes;
         }
 
-        public override StartupOptions Clone() => new SequentialStartupOptions(Nodes.ToArray()) { Name = Name };
+        public override StartupOptions Clone()
+        {
+            var clone = new SequentialStartupOptions(Nodes.ToArray());
+            clone.Fill(this);
+            return clone;
+        }
 
         public override IObservable<ITaskRun> Construct(IRemoteExecution ExecuteService, string Command) =>
             Nodes.ToObservable()

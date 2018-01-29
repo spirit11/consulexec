@@ -11,12 +11,12 @@
     <DockPanel>
         <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Top"/>
 
-        <DockPanel DockPanel.Dock="Top">
+        <DockPanel  DockPanel.Dock="Top" DataContext="{Binding Connections}">
             <Label Content="Execution Profile:"/>
-            <Button Command="{Binding EditCommand}" Content="Edit" DockPanel.Dock="Right"/>
-            <Button Command="{Binding StartupOptionsProfiles.DeleteCommand}" Content="Delete" DockPanel.Dock="Right"/>
-            <Button Command="{Binding StartupOptionsProfiles.AddCommand}" Content="Add" DockPanel.Dock="Right"/>
-            <ComboBox ItemsSource="{Binding StartupOptionsProfiles.List}" SelectedItem="{Binding StartupOptionsProfiles.Profile}" DisplayMemberPath="Name" />
+            <Button Command="{Binding}" Content="Edit" DockPanel.Dock="Right"/>
+            <Button Command="{Binding DeleteCommand}" Content="Delete" DockPanel.Dock="Right"/>
+            <Button Command="{Binding AddCommand}" Content="Add" DockPanel.Dock="Right"/>
+            <ComboBox ItemsSource="{Binding List}" SelectedItem="{Binding Profile}" DisplayMemberPath="Name" />
         </DockPanel>
 
         <UniformGrid Margin="10,0,10,10" Rows="1" Height="45" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
