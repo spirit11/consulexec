@@ -26,8 +26,8 @@ namespace ConsulExec.ViewModel
 
         public void Deactivate(object ViewModel)
         {
-            viewModels.Remove(ViewModel);
             Content = viewModels.Last();
+            viewModels.Remove(Content);
             this.RaisePropertyChanged(nameof(Content));
         }
 

@@ -25,8 +25,13 @@ namespace ConsulExec.ViewModel
             ActivatingViewModel?.Activate(profileEditorViewModel);
         }
 
-        public static ProfilesViewModel<ProfileViewModel<ConnectionOptions>>.EditProfileDelegate EditConnectionOptions(IActivatingViewModel GetInstance) =>
-            (vm, setup) => { };
+        public static ProfilesViewModel<ProfileViewModel<ConnectionOptions>>.EditProfileDelegate EditConnectionOptions(IActivatingViewModel ActivatingViewModel)
+            =>
+            (vm, setup) =>
+            {
+                var profileEditorViewModel = new ConnectionOptionsEditorViewModel(new ConnectionOptions(), ActivatingViewModel);
+                ActivatingViewModel?.Activate(profileEditorViewModel);
+            };
     }
 
 

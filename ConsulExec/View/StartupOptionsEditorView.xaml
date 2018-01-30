@@ -13,7 +13,7 @@
 
         <DockPanel  DockPanel.Dock="Top" DataContext="{Binding Connections}">
             <Label Content="Execution Profile:"/>
-            <Button Command="{Binding}" Content="Edit" DockPanel.Dock="Right"/>
+            <Button Command="{Binding EditCommand}" Content="Edit" DockPanel.Dock="Right"/>
             <Button Command="{Binding DeleteCommand}" Content="Delete" DockPanel.Dock="Right"/>
             <Button Command="{Binding AddCommand}" Content="Add" DockPanel.Dock="Right"/>
             <ComboBox ItemsSource="{Binding List}" SelectedItem="{Binding Profile}" DisplayMemberPath="Name" />

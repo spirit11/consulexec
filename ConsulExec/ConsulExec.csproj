@@ -135,9 +135,12 @@
     <Compile Include="Infrastructure\TaskExtensions.cs" />
     <Compile Include="RuntimeRegistry.cs" />
     <Compile Include="StructureMapToSplatLocatorAdapter.cs" />
+    <Compile Include="ViewModel\BaseOptionsEditorViewModel.cs" />
     <Compile Include="ViewModel\CommandRunViewModel.cs" />
     <Compile Include="ViewModel\CommandStartupViewModel.cs" />
+    <Compile Include="ViewModel\ConnectionOptionsEditorViewModel.cs" />
     <Compile Include="ViewModel\ConnectionProfilesViewModel.cs" />
+    <Compile Include="ViewModel\IProfileEditorViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\NodeRunViewModel.cs" />
     <Compile Include="ViewModel\NodeSelectorViewModel.cs" />
@@ -156,6 +159,9 @@
     </Compile>
     <Compile Include="View\NodeRunView.xaml.cs">
       <DependentUpon>NodeRunView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ConnectionOptionsEditorView.xaml.cs">
+      <DependentUpon>ConnectionOptionsEditorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\StartupOptionsEditorView.xaml.cs">
       <DependentUpon>StartupOptionsEditorView.xaml</DependentUpon>
@@ -183,6 +189,10 @@
     <Page Include="View\NodeRunView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\ConnectionOptionsEditorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="View\StartupOptionsEditorView.xaml">
       <SubType>Designer</SubType>

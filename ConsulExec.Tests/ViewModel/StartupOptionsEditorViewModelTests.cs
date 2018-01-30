@@ -16,12 +16,12 @@ namespace ConsulExec.Tests.ViewModel
         {
             var nodes = new Subject<string[]>();
 
-            var profilesViewModel = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
+            var connections = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
                 m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>());
 
             var target = new StartupOptionsEditorViewModel(
                 ProfilesViewModelsFactory.Create(new SequentialStartupOptions(new string[0]) { Name = "opt" }),
-                profilesViewModel,
+                connections,
                 null,
                 nodes);
 
@@ -51,10 +51,10 @@ namespace ConsulExec.Tests.ViewModel
             startupOptionsProfileViewModel = ProfilesViewModelsFactory.Create(new SequentialStartupOptions(nodeNames) { Name = OldName });
             nodesSource =
                 new BehaviorSubject<string[]>(nodeNames.Where(nn => !absentNodeNames.Contains(nn)).ToArray());
-            var profilesViewModel = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
+            var connections = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
                 m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>());
             target = new StartupOptionsEditorViewModel(startupOptionsProfileViewModel,
-                profilesViewModel,
+                connections,
                 null,
                 NodesSource: nodesSource);
 
@@ -72,15 +72,6 @@ namespace ConsulExec.Tests.ViewModel
             Expect(target.Nodes.Select(n => n.IsAbsent), All.True);
             nodesSource.OnNext(nodeNames);
             Expect(target.Nodes.Select(n => n.IsAbsent), All.False);
-        }
-
-        [Test]
-        public void CancelDiscardChanges()
-        {
-            target.CancelCommand.Execute(null);
-
-            Expect(target.Name, EqualTo(OldName));
-            Expect(startupOptionsProfileViewModel.Options.Nodes, EquivalentTo(nodeNames));
         }
 
         [Test]
