@@ -12,14 +12,16 @@ namespace ConsulExec
         public RuntimeRegistry()
         {
             Policies.OnMissingFamily(new DefaultInterfaceImplementationPolicy());
+
             For<IRemoteExecution>().Use<Design.FakeRemoteExecution>().Singleton();
 
             ForConcreteType<ReactiveList<ProfileViewModel<ConnectionOptions>>>().Configure.Singleton();
+            For<IEditorsFabric>().Use<EditorsFabric>();
 
             ForConcreteType<ConnectionProfilesViewModel>()
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<ConnectionOptions>>.EditProfileDelegate>()
-                .Is(ctxt => EditorsFabric.EditConnectionOptions(ctxt.GetInstance<IActivatingViewModel>()));
+                .Is(ctxt => ctxt.GetInstance<IEditorsFabric>().EditConnectionOptions);
 
             ForConcreteType<MainWindowViewModel>().Configure.Singleton();
 
@@ -29,7 +31,7 @@ namespace ConsulExec
             ForConcreteType<StartupOptionsProfilesViewModel>()
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate>()
-                .Is(ctxt => EditorsFabric.EditStartupOptions(ctxt.GetInstance<IActivatingViewModel>(), ctxt.GetInstance<ConnectionProfilesViewModel>()))
+                .Is(ctxt => ctxt.GetInstance<IEditorsFabric>().EditStartupOptions)
                 .Ctor<ReactiveList<ProfileViewModel<StartupOptions>>>()
                 .Is(new ReactiveList<ProfileViewModel<StartupOptions>>());
 

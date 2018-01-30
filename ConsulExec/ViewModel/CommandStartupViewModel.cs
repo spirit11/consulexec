@@ -2,39 +2,9 @@
 using System;
 using System.Windows.Input;
 using ConsulExec.Domain;
-using Splat;
 
 namespace ConsulExec.ViewModel
 {
-    public class EditorsFabric
-    {
-        public static ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate EditStartupOptions(IActivatingViewModel ActivatingViewModel,
-            ConnectionProfilesViewModel Connections) =>
-            (vm, setup) => EditStartupOptions(ActivatingViewModel, vm, setup, Connections);
-
-        public static void EditStartupOptions(IActivatingViewModel ActivatingViewModel,
-            ProfileViewModel<StartupOptions> StartupOptionsProfileViewModel,
-            Action<StartupOptionsEditorViewModel> SetupEditor, ConnectionProfilesViewModel Connections)
-        {
-            var profileEditorViewModel = new StartupOptionsEditorViewModel(StartupOptionsProfileViewModel,
-                Connections,
-                ActivatingViewModel,
-                Locator.Current.GetService<IRemoteExecution>().Nodes
-                );
-            SetupEditor(profileEditorViewModel);
-            ActivatingViewModel?.Activate(profileEditorViewModel);
-        }
-
-        public static ProfilesViewModel<ProfileViewModel<ConnectionOptions>>.EditProfileDelegate EditConnectionOptions(IActivatingViewModel ActivatingViewModel)
-            =>
-            (vm, setup) =>
-            {
-                var profileEditorViewModel = new ConnectionOptionsEditorViewModel(new ConnectionOptions(), ActivatingViewModel);
-                ActivatingViewModel?.Activate(profileEditorViewModel);
-            };
-    }
-
-
     public class CommandStartupViewModel : ReactiveObject
     {
         public CommandStartupViewModel(ConnectionProfilesViewModel ConnectionProfilesViewModel,

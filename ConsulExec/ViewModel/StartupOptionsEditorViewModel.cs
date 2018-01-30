@@ -80,20 +80,21 @@ namespace ConsulExec.ViewModel
         private readonly IDisposable namesSubscription;
         private readonly StartupOptions options;
 
-        private void MapBack(StartupOptions Options)
+        private void MapBack(StartupOptions StartupOptions)
         {
-            Options.Name = Name;
-            ((SequentialStartupOptions)Options).SetNodes(Nodes.Where(n => n.IsChecked).Select(n => n.Name).ToArray());
-            Options.Connection = Connections.Profile?.Options;
+            StartupOptions.Name = Name;
+            ((SequentialStartupOptions)StartupOptions).SetNodes(Nodes.Where(n => n.IsChecked).Select(n => n.Name).ToArray());
+            StartupOptions.Connection = Connections.Profile?.Options;
         }
 
-        private void Map(StartupOptions Options)
+        private void Map(StartupOptions StartupOptions)
         {
-            Name = Options.Name;
+            Name = StartupOptions.Name;
             Nodes = new ObservableCollection<NodeSelectorViewModel>(
-                (Options.Nodes ?? Enumerable.Empty<string>())
+                (StartupOptions.Nodes ?? Enumerable.Empty<string>())
                 .Select(n => new NodeSelectorViewModel(n) { IsChecked = true }));
-            Connections.Profile = Connections.List.FirstOrDefault(p => p.Options == Options.Connection);
+
+            Connections.Profile = Connections.List.FirstOrDefault(p => p.Options == StartupOptions.Connection);
         }
 
     }

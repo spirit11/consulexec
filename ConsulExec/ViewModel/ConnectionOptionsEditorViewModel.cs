@@ -5,7 +5,7 @@ using Splat;
 
 namespace ConsulExec.ViewModel
 {
-    public class ConnectionOptionsEditorViewModel : BaseOptionsEditorViewModel<ConnectionOptions>
+    public class ConnectionOptionsEditorViewModel : BaseOptionsEditorViewModel<ProfileViewModel<ConnectionOptions>>
     {
         public ConnectionOptionsEditorViewModel()
             : base(null, null)
@@ -15,7 +15,7 @@ namespace ConsulExec.ViewModel
             Name = "Some name";
         }
 
-        public ConnectionOptionsEditorViewModel(ConnectionOptions Options, IActivatingViewModel Activator)
+        public ConnectionOptionsEditorViewModel(ProfileViewModel<ConnectionOptions> Options, IActivatingViewModel Activator)
             : base(Options, Activator)
         {
             Name = Options.Name;
@@ -27,6 +27,8 @@ namespace ConsulExec.ViewModel
 
         protected override void OnDeactivate(bool Canceled)
         {
+            if (!Canceled)
+                Options.Options.Name = Name;
             base.OnDeactivate(Canceled);
         }
     }

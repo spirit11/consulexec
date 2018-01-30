@@ -31,7 +31,7 @@ namespace ConsulExec.ViewModel
 
         protected BaseOptionsEditorViewModel(T Options, IActivatingViewModel Activator)
         {
-            options = Options;
+            this.Options = Options;
             activator = Activator;
 
             okCommand = ReactiveCommand.Create(() =>
@@ -46,6 +46,8 @@ namespace ConsulExec.ViewModel
 
             deleteCommand = ReactiveCommand.Create(() => Deactivate(true), canDelete);
         }
+
+        protected T Options { get; }
 
         protected IObservable<bool> IsValid
         {
@@ -67,12 +69,11 @@ namespace ConsulExec.ViewModel
         }
 
         private readonly BehaviorSubject<bool> canDelete = new BehaviorSubject<bool>(false);
-        private readonly T options;
         private readonly IActivatingViewModel activator;
 
         private BaseOptionsEditorViewModel<T> AddHandler(IObservable<Unit> Command, Action<T> Handler)
         {
-            Command.Subscribe(_ => Handler(options));
+            Command.Subscribe(_ => Handler(Options));
             return this;
         }
 

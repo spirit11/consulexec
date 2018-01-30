@@ -140,6 +140,7 @@
     <Compile Include="ViewModel\CommandStartupViewModel.cs" />
     <Compile Include="ViewModel\ConnectionOptionsEditorViewModel.cs" />
     <Compile Include="ViewModel\ConnectionProfilesViewModel.cs" />
+    <Compile Include="ViewModel\EditorsFabric.cs" />
     <Compile Include="ViewModel\IProfileEditorViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\NodeRunViewModel.cs" />
