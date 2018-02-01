@@ -14,12 +14,10 @@ namespace ConsulExec.ViewModel
     {
         public EditorsFabric(IActivatingViewModel ActivatingViewModel,
             ReactiveList<ProfileViewModel<ConnectionOptions>> ConnectionsList,
-            IRemoteExecution RemoteExecution,
             UndoListViewModel UndoList)
         {
             activatingViewModel = ActivatingViewModel;
             connectionsList = ConnectionsList;
-            remoteExecution = RemoteExecution;
             undoList = UndoList;
         }
 
@@ -28,8 +26,7 @@ namespace ConsulExec.ViewModel
             Activate(EditorSetup, 
                 new StartupOptionsEditorViewModel(Profile,
                     new ConnectionProfilesViewModel(EditConnectionOptions, undoList, connectionsList),
-                    activatingViewModel,
-                    remoteExecution.Nodes
+                    activatingViewModel
             ));
         }
 
@@ -40,7 +37,6 @@ namespace ConsulExec.ViewModel
 
         private readonly IActivatingViewModel activatingViewModel;
         private readonly ReactiveList<ProfileViewModel<ConnectionOptions>> connectionsList;
-        private readonly IRemoteExecution remoteExecution;
         private readonly UndoListViewModel undoList;
 
         private void Activate<T>(Action<IProfileEditorViewModel<ProfileViewModel<T>>> Setup,

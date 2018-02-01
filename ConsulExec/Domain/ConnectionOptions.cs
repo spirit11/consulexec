@@ -14,7 +14,7 @@ namespace ConsulExec.Domain
             return new ConnectionOptions { Name = Name, ServerAddress = ServerAddress };
         }
 
-        public IRemoteExecution Create()
+        public virtual IRemoteExecution Create()
         {
             return new FakeRemoteExecution();
         }

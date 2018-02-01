@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Subjects;
 using ConsulExec.Domain;
 using ConsulExec.ViewModel;
@@ -15,15 +17,7 @@ namespace ConsulExec.Tests.ViewModel
         public void NodesInfoHandledProperly()
         {
             var nodes = new Subject<string[]>();
-
-            var connections = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
-                m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>());
-
-            var target = new StartupOptionsEditorViewModel(
-                ProfilesViewModelsFactory.Create(new SequentialStartupOptions(new string[0]) { Name = "opt" }),
-                connections,
-                null,
-                nodes);
+            var target = CreateTarget(nodes, new string[0]);
 
             Expect(target.Nodes, Is.Empty);
 
@@ -39,6 +33,21 @@ namespace ConsulExec.Tests.ViewModel
             Expect(target.Nodes.Select(n => n.Name), EqualTo(new[] { "a", "b", "c" }));
             Expect(target.Nodes.First(n => n.Name == "b").IsAbsent, Is.True);
         }
+
+        public static StartupOptionsEditorViewModel CreateTarget(IObservable<string[]> Nodes, string[] InitialNodes)
+        {
+            var remoteExec = Mock.Of<IRemoteExecution>(ir => ir.Nodes == Nodes);
+            var co = Mock.Of<ConnectionOptions>(v => v.Create() == remoteExec);
+
+            var connections = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
+                m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>(new[] { new ProfileViewModel<ConnectionOptions>(co, v => v.Name) }));
+            var target = new StartupOptionsEditorViewModel(
+                ProfilesViewModelsFactory.Create(new SequentialStartupOptions(InitialNodes) { Connection = co, Name = "opt" }),
+                connections,
+                null);
+
+            return target;
+        }
     }
 
 
@@ -48,15 +57,18 @@ namespace ConsulExec.Tests.ViewModel
         [SetUp]
         public void SetUp()
         {
-            startupOptionsProfileViewModel = ProfilesViewModelsFactory.Create(new SequentialStartupOptions(nodeNames) { Name = OldName });
-            nodesSource =
-                new BehaviorSubject<string[]>(nodeNames.Where(nn => !absentNodeNames.Contains(nn)).ToArray());
+            nodes = new BehaviorSubject<string[]>(nodeNames.Where(nn => !absentNodeNames.Contains(nn)).ToArray());
+
+            var remoteExec = Mock.Of<IRemoteExecution>(ir => ir.Nodes == nodes);
+            var co = Mock.Of<ConnectionOptions>(v => v.Create() == remoteExec);
+            startupOptionsProfileViewModel = ProfilesViewModelsFactory.Create(new SequentialStartupOptions(nodeNames) { Connection = co, Name = OldName });
             var connections = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
-                m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>());
-            target = new StartupOptionsEditorViewModel(startupOptionsProfileViewModel,
+                m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>(new[] { new ProfileViewModel<ConnectionOptions>(co, f => f.Name) }));
+            target =
+                new StartupOptionsEditorViewModel(
+                startupOptionsProfileViewModel,
                 connections,
-                null,
-                NodesSource: nodesSource);
+                null);
 
             foreach (var node in target.Nodes)
                 node.IsChecked = selectedNodeNames.Contains(node.Name);
@@ -68,9 +80,9 @@ namespace ConsulExec.Tests.ViewModel
         {
             Expect(target.Nodes.Where(n => absentNodeNames.Contains(n.Name)).Select(n => n.IsAbsent), All.True);
             Expect(target.Nodes.Where(n => !absentNodeNames.Contains(n.Name)).Select(n => n.IsAbsent), All.False);
-            nodesSource.OnNext(new string[0]);
+            nodes.OnNext(new string[0]);
             Expect(target.Nodes.Select(n => n.IsAbsent), All.True);
-            nodesSource.OnNext(nodeNames);
+            nodes.OnNext(nodeNames);
             Expect(target.Nodes.Select(n => n.IsAbsent), All.False);
         }
 
@@ -90,8 +102,8 @@ namespace ConsulExec.Tests.ViewModel
         private readonly string[] selectedNodeNames = { "1", "3" };
         private readonly string[] absentNodeNames = { "1", "2" };
 
-        private ProfileViewModel<StartupOptions> startupOptionsProfileViewModel;
         private StartupOptionsEditorViewModel target;
-        private BehaviorSubject<string[]> nodesSource;
+        private BehaviorSubject<string[]> nodes;
+        private ProfileViewModel<StartupOptions> startupOptionsProfileViewModel;
     }
 }

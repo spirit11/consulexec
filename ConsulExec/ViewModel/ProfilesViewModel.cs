@@ -24,7 +24,18 @@ namespace ConsulExec.ViewModel
         public ICommand EditCommand { get; }
         public ICommand UndoCommand => undoList.UndoCommand;
 
-        public T Profile { get { return profile; } set { this.RaiseAndSetIfChanged(ref profile, value); } }
+        public T Profile
+        {
+            get
+            {
+                return profile;
+            }
+            set
+            {
+                this.RaiseAndSetIfChanged(ref profile, value);
+            }
+        }
+
         private T profile;
 
         protected ProfilesViewModel(EditProfileDelegate EditProfile, UndoListViewModel UndoList, ReactiveList<T> Profiles)

@@ -25,12 +25,10 @@ namespace ConsulExec.ViewModel
         public StartupOptionsEditorViewModel(
             ProfileViewModel<StartupOptions> Options,
             IProfilesViewModel<ConnectionOptionsViewModel> Connections,
-            IActivatingViewModel Activator,
-            IObservable<string[]> NodesSource) : base(Options, Activator)
+            IActivatingViewModel Activator) : base(Options, Activator)
         {
             AssertNotNull(Options, nameof(Options));
             AssertNotNull(Connections, nameof(Connections));
-            AssertNotNull(NodesSource, nameof(NodesSource));
 
             options = Options.Options;
 
@@ -43,8 +41,7 @@ namespace ConsulExec.ViewModel
                 (s, p) => !string.IsNullOrWhiteSpace(s) && p != null);
 
             namesSubscription =
-                  NodesSource
-                //Connections.WhenAnyValue(v => v.Profile).SelectMany(v => v.Options.Create().Nodes)
+                Connections.WhenAnyValue(v => v.Profile).Where(v => v != null).SelectMany(v => v.Options.Create().Nodes)
                 .StartWith(Enumerable.Repeat(new string[0], 1)) // initial values until first request is completed
                 .Subscribe(names =>
                 {
@@ -96,7 +93,7 @@ namespace ConsulExec.ViewModel
                 (StartupOptions.Nodes ?? Enumerable.Empty<string>())
                 .Select(n => new NodeSelectorViewModel(n) { IsChecked = true }));
 
-            Connections.Profile = Connections.List.FirstOrDefault(p => p.Options == StartupOptions.Connection);
+            Connections.Profile = Connections.List.First(p => p.Options == StartupOptions.Connection); //TODO issue if no item in list - wrong place to handle
         }
 
     }
