@@ -13,7 +13,8 @@ namespace ConsulExec
         {
             Policies.OnMissingFamily(new DefaultInterfaceImplementationPolicy());
 
-            For<IRemoteExecution>().Use<Design.FakeRemoteExecution>().Singleton();
+            //For<IRemoteExecution>().Use<Design.FakeRemoteExecution>().Singleton();
+            For<IRemoteExecution>().Use<RemoteExecution>().Singleton();
 
             ForConcreteType<ReactiveList<ProfileViewModel<ConnectionOptions>>>().Configure.Singleton();
             For<IEditorsFabric>().Use<EditorsFabric>();
@@ -67,8 +68,9 @@ namespace ConsulExec
             CommandStartupViewModel.RecentCommands.Add("echo ok");
             CommandStartupViewModel.RecentCommands.Add("ping ya.ru");
 
-            var connectionOptions = new ConnectionOptions { Name = "serv2" };
-            CommandStartupViewModel.ConnectionProfiles.List.Add(new ProfileViewModel<ConnectionOptions>(new ConnectionOptions { Name = "serv1" }, f => f.Name));
+            var connectionOptions = new ConnectionOptions { Name = "serv2", ServerAddress = "http://serv2" };
+            CommandStartupViewModel.ConnectionProfiles.List.Add(
+                new ProfileViewModel<ConnectionOptions>(new ConnectionOptions { Name = "serv1", ServerAddress = "http://serv1" }, f => f.Name));
             CommandStartupViewModel.ConnectionProfiles.List.Add(new ProfileViewModel<ConnectionOptions>(connectionOptions, f => f.Name));
 
             CommandStartupViewModel.StartupOptionsProfiles.List.Add(

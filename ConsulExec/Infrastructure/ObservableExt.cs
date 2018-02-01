@@ -51,20 +51,20 @@ namespace ConsulExec.Infrastructure
                 var ct = cts.Token;
                 Task.Run(() =>
                 {
-                    foreach (var t in bc.GetConsumingEnumerable(ct))
+                    try
                     {
-                        var r = default(TR);
-                        try
+                        foreach (var t in bc.GetConsumingEnumerable(ct))
                         {
+                            var r = default(TR);
                             r = ResultSelector(t);
                             o.OnNext(r);
                             ContinuationSelector(r).Wait();
                         }
-                        catch (Exception e)
-                        {
-                            o.OnError(e);
-                            return;
-                        }
+                    }
+                    catch (Exception e)
+                    {
+                        o.OnError(e);
+                        return;
                     }
 
                     o.OnCompleted();

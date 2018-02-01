@@ -5,7 +5,7 @@ namespace ConsulExec.ViewModel
     public static class ProfilesViewModelsFactory
     {
         public static ProfileViewModel<StartupOptions> Create(StartupOptions StartupOptions) =>
-            new ProfileViewModel<StartupOptions>(StartupOptions, o => o.Name);
+            new ProfileViewModel<StartupOptions>(StartupOptions, o => $"{o.Name} [{o.Connection?.Name}]");
 
 
         public static ProfileViewModel<ConnectionOptions> Create(ConnectionOptions ConnectionOptions) =>

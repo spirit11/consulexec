@@ -10,6 +10,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <DockPanel>
         <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Top"/>
+        <TextBox Text="{Binding ServerAddress, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Top"/>
 
         <UniformGrid Margin="10,0,10,10" Rows="1" Height="45" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
             <Button Command="{Binding OkCommand}" Content="Ok"/>

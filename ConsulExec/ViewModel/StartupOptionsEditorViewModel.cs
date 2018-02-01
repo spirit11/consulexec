@@ -42,7 +42,9 @@ namespace ConsulExec.ViewModel
                 v => v.Connections.Profile,
                 (s, p) => !string.IsNullOrWhiteSpace(s) && p != null);
 
-            namesSubscription = NodesSource
+            namesSubscription =
+                  NodesSource
+                //Connections.WhenAnyValue(v => v.Profile).SelectMany(v => v.Options.Create().Nodes)
                 .StartWith(Enumerable.Repeat(new string[0], 1)) // initial values until first request is completed
                 .Subscribe(names =>
                 {

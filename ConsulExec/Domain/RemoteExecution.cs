@@ -230,7 +230,7 @@ namespace ConsulExec.Domain
         {
             return new ConsulClient(ccc =>
             {
-                // ccc.Address = new Uri("http://192.168.1.101:8500");
+                 ccc.Address = new Uri("http://192.168.1.101:8500");
             });
         }
     }
