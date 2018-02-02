@@ -93,7 +93,10 @@ namespace ConsulExec.ViewModel
                 (StartupOptions.Nodes ?? Enumerable.Empty<string>())
                 .Select(n => new NodeSelectorViewModel(n) { IsChecked = true }));
 
-            Connections.Profile = Connections.List.First(p => p.Options == StartupOptions.Connection); //TODO issue if no item in list - wrong place to handle
+            var connection = StartupOptions.Connection;
+            Connections.Profile = connection == null
+                ? null
+                : Connections.List.First(p => p.Options == connection); //TODO issue if no item in list - wrong place to handle
         }
 
     }

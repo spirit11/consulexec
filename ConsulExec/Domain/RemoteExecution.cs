@@ -14,7 +14,7 @@ namespace ConsulExec.Domain
 {
     public class RemoteExecution : IRemoteExecution
     {
-        public RemoteExecution()
+        public RemoteExecution(string ServerAddress = "http://localhost:8500")
         {
             Nodes = Observable.Create<string[]>(async (o, ct) =>
             {
@@ -34,18 +34,24 @@ namespace ConsulExec.Domain
                     await Task.Delay(1000, ct);
                 }
             }).Retry(TimeSpan.FromSeconds(2)).Publish().RefCount();
+            address = new Uri(ServerAddress);
         }
 
         public IObservable<string[]> Nodes { get; }
 
         public IObservable<ITaskRun> Execute(IObservable<NodeExecutionTask> Tasks)
         {
-            return Observable.Create<ITaskRun>(async (o, ct) => await new ConsulRun { Tasks = Tasks, Observer = o, Token = ct }.Run())
+            return Observable.Create<ITaskRun>(async (o, ct) => await new ConsulRun(address) { Tasks = Tasks, Observer = o, Token = ct }.Run())
                 .Publish().RefCount();
         }
 
         private class ConsulRun
         {
+            public ConsulRun(Uri Address)
+            {
+                client = new Lazy<ConsulClient>(() => new ConsulClient(config => { config.Address = Address; }));
+            }
+
             public IObservable<NodeExecutionTask> Tasks;
             public IObserver<TaskRun> Observer;
             public CancellationToken Token;
@@ -176,7 +182,7 @@ namespace ConsulExec.Domain
             private bool taskSourceCompleted;
 
             private ConsulClient Client => client.Value;
-            private readonly Lazy<ConsulClient> client = new Lazy<ConsulClient>(CreateClient);
+            private readonly Lazy<ConsulClient> client;
 
             private readonly Dictionary<NodeExecutionTask, string> sessions = new Dictionary<NodeExecutionTask, string>();
             private readonly Dictionary<NodeExecutionTask, int> sessionCounters = new Dictionary<NodeExecutionTask, int>();
@@ -224,14 +230,11 @@ namespace ConsulExec.Domain
             return sessionReq.Response;
         }
 
-        private static async Task<ConsulClient> CreateClientAsync() => await Task.Run(() => CreateClient());
+        private readonly Uri address;
 
-        private static ConsulClient CreateClient()
-        {
-            return new ConsulClient(ccc =>
-            {
-                 ccc.Address = new Uri("http://192.168.1.101:8500");
-            });
-        }
+        private async Task<ConsulClient> CreateClientAsync() => await Task.Run(() => CreateClient());
+
+        private ConsulClient CreateClient() =>
+            new ConsulClient(config => { config.Address = address; });
     }
 }

@@ -111,6 +111,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DefaultInterfaceImplementationPolicy.cs" />
+    <Compile Include="Design\FakeConnectionOptions.cs" />
     <Compile Include="Design\FakeTaskRun.cs" />
     <Compile Include="Domain\ConnectionOptions.cs" />
     <Compile Include="Infrastructure\ConventionalViewLocator.cs" />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using ConsulExec.Design;
 using ConsulExec.Domain;
 using ConsulExec.ViewModel;
 using ReactiveUI;
@@ -13,11 +14,15 @@ namespace ConsulExec
         {
             Policies.OnMissingFamily(new DefaultInterfaceImplementationPolicy());
 
-            //For<IRemoteExecution>().Use<Design.FakeRemoteExecution>().Singleton();
-            For<IRemoteExecution>().Use<RemoteExecution>().Singleton();
 
             ForConcreteType<ReactiveList<ProfileViewModel<ConnectionOptions>>>().Configure.Singleton();
+
+            For<ConnectionProfilesViewModel.OptionsFactoryDelegate>()
+                .Use(new ConnectionProfilesViewModel.OptionsFactoryDelegate(Name => new ConnectionOptions { Name = Name }));
             For<IEditorsFabric>().Use<EditorsFabric>();
+
+            For<StartupOptionsProfilesViewModel.OptionsFabricDelegate>()
+                .Use(new StartupOptionsProfilesViewModel.OptionsFabricDelegate(Name => new SequentialStartupOptions(Array.Empty<string>()) { Name = Name }));
 
             ForConcreteType<ConnectionProfilesViewModel>()
                 .Configure
@@ -36,9 +41,8 @@ namespace ConsulExec
                 .Ctor<ReactiveList<ProfileViewModel<StartupOptions>>>()
                 .Is(new ReactiveList<ProfileViewModel<StartupOptions>>());
 
-            ForConcreteType<CommandRunViewModel>();
-
-            For<Action<StartupOptions, string>>().Use(ctxt => StartCommand(ctxt))
+            For<Action<StartupOptions, string>>()
+                .Use(ctxt => StartCommand(ctxt))
                 .Named("executeCommandHandler");
 
             ForConcreteType<CommandStartupViewModel>()
@@ -51,8 +55,7 @@ namespace ConsulExec
         private static Action<StartupOptions, string> StartCommand(IContext Context) =>
             (options, command) =>
             {
-                var executeService = Context.GetInstance<IRemoteExecution>();
-                var tasks = options.Construct(executeService, command);
+                var tasks = options.Construct(command);
                 var mvm = Context.GetInstance<IActivatingViewModel>();
                 mvm.Activate(new CommandRunViewModel(options.Nodes, tasks, mvm)
                 //Context.GetInstance<Func<string[], IObservable<ITaskRun>, CommandRunViewModel>>()(options.Nodes, tasks)

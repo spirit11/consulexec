@@ -10,8 +10,9 @@ namespace ConsulExec.Design
 {
     internal class FakeRemoteExecution : IRemoteExecution
     {
-        public FakeRemoteExecution()
+        public FakeRemoteExecution(string Address)
         {
+            address = Address;
             Nodes = Observable.Create<string[]>(async (o, ct) =>
             {
                 var idx = 0;
@@ -46,9 +47,9 @@ namespace ConsulExec.Design
 
         public IObservable<string[]> Nodes { get; }
 
-        public IObservable<ITaskRun> Execute(IObservable<NodeExecutionTask> Tasks)
-        {
-            return Tasks.Select(FakeTaskRun.Create);
-        }
+        public IObservable<ITaskRun> Execute(IObservable<NodeExecutionTask> Tasks) =>
+            Tasks.Select(t => FakeTaskRun.Create(t, address));
+
+        private readonly string address;
     }
 }

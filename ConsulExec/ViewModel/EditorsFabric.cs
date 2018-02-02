@@ -14,18 +14,20 @@ namespace ConsulExec.ViewModel
     {
         public EditorsFabric(IActivatingViewModel ActivatingViewModel,
             ReactiveList<ProfileViewModel<ConnectionOptions>> ConnectionsList,
-            UndoListViewModel UndoList)
+            UndoListViewModel UndoList,
+            ConnectionProfilesViewModel.OptionsFactoryDelegate ConnectionOptionsFabric)
         {
             activatingViewModel = ActivatingViewModel;
             connectionsList = ConnectionsList;
             undoList = UndoList;
+            connectionOptionsFabric = ConnectionOptionsFabric;
         }
 
         public void EditStartupOptions(ProfileViewModel<StartupOptions> Profile, Action<IProfileEditorViewModel<ProfileViewModel<StartupOptions>>> EditorSetup)
         {
-            Activate(EditorSetup, 
+            Activate(EditorSetup,
                 new StartupOptionsEditorViewModel(Profile,
-                    new ConnectionProfilesViewModel(EditConnectionOptions, undoList, connectionsList),
+                    new ConnectionProfilesViewModel(EditConnectionOptions, undoList, connectionsList, connectionOptionsFabric),
                     activatingViewModel
             ));
         }
@@ -38,6 +40,7 @@ namespace ConsulExec.ViewModel
         private readonly IActivatingViewModel activatingViewModel;
         private readonly ReactiveList<ProfileViewModel<ConnectionOptions>> connectionsList;
         private readonly UndoListViewModel undoList;
+        private readonly ConnectionProfilesViewModel.OptionsFactoryDelegate connectionOptionsFabric;
 
         private void Activate<T>(Action<IProfileEditorViewModel<ProfileViewModel<T>>> Setup,
             IProfileEditorViewModel<ProfileViewModel<T>> ProfileEditorViewModel)

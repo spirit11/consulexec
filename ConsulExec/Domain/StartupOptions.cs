@@ -17,7 +17,7 @@ namespace ConsulExec.Domain
 
         object ICloneable.Clone() => Clone();
 
-        public abstract IObservable<ITaskRun> Construct(IRemoteExecution ExecuteService, string Command);
+        public abstract IObservable<ITaskRun> Construct(string Command);
 
         protected void Fill(StartupOptions Other)
         {
@@ -48,9 +48,9 @@ namespace ConsulExec.Domain
             return clone;
         }
 
-        public override IObservable<ITaskRun> Construct(IRemoteExecution ExecuteService, string Command) =>
+        public override IObservable<ITaskRun> Construct(string Command) =>
             Nodes.ToObservable()
-            .Process(name => ExecuteService.Execute(Observable.Return(new NodeExecutionTask(Command, NamePattern: $"^{name}$"))),
+            .Process(name => Connection.Create().Execute(Observable.Return(new NodeExecutionTask(Command, NamePattern: $"^{name}$"))),
                     t => t.SelectMany(v => v.ReturnCode.Select(_ => true)).All(b => b))
             .Concat().Publish().RefCount();
 

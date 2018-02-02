@@ -9,14 +9,10 @@ namespace ConsulExec.Domain
 
         public string ServerAddress { get; set; }
 
-        public object Clone()
-        {
-            return new ConnectionOptions { Name = Name, ServerAddress = ServerAddress };
-        }
+        public virtual object Clone() => 
+            new ConnectionOptions { Name = Name, ServerAddress = ServerAddress };
 
-        public virtual IRemoteExecution Create()
-        {
-            return new FakeRemoteExecution();
-        }
+        public virtual IRemoteExecution Create() => 
+            new RemoteExecution(ServerAddress);
     }
 }

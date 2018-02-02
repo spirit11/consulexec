@@ -11,7 +11,7 @@ namespace ConsulExec.Tests
         [Explicit("Integration test with running consul agent")]
         public void CheckExecutionReturnsOutputStream()
         {
-            var target = new RemoteExecution();
+            var target = new RemoteExecution("http://localhost:8500");
             var l = target.Execute(Observable.Return(new NodeExecutionTask("echo ok")))
                 .SelectMany(v => v.Output)
                 .ToList().Wait(); //TODO timeout
