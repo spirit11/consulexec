@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Subjects;
 using ConsulExec.Domain;
@@ -17,7 +18,8 @@ namespace ConsulExec.Tests.ViewModel
             var co = Mock.Of<ConnectionOptions>(v => v.Create() == remoteExec);
 
             var connections = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
-                m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>(new[] { new ProfileViewModel<ConnectionOptions>(co, v => v.Name) }));
+                m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>(new[] { ProfilesViewModelsFactory.Create(co) }));
+
             StartupOptionsProfileViewModel = ProfilesViewModelsFactory.Create(new SequentialStartupOptions(InitialNodes) { Connection = co, Name = OldName });
             Target = new StartupOptionsEditorViewModel(
                 StartupOptionsProfileViewModel,
@@ -54,6 +56,27 @@ namespace ConsulExec.Tests.ViewModel
 
             Expect(Target.Nodes.Select(n => n.Name), EqualTo(new[] { "a", "b", "c" }));
             Expect(Target.Nodes.First(n => n.Name == "b").IsAbsent, Is.True);
+        }
+
+        [Test]
+        public void ReconnectingWhenNewServerSetUp()
+        {
+            var nodes = new BehaviorSubject<string[]>(new[] { "a", "b" });
+            CreateTarget(nodes, new string[0]);
+
+            var fakeConnection = Mock.Of<IRemoteExecution>(
+                o => o.Nodes == new BehaviorSubject<string[]>(new[] { "c", "d", "e" }));
+
+            var options = Mock.Of<ConnectionOptions>(
+                o => o.Create() == fakeConnection);
+
+            var connectionProfile = new ProfileViewModel<ConnectionOptions>(options, f => "Fake");
+            Target.Connections.List.Add(connectionProfile);
+            Target.Connections.Profile = connectionProfile;
+
+            Expect(Target.Nodes.Count, Is.EqualTo(3));
+
+            Mock.Get(options).VerifyAll();
         }
     }
 

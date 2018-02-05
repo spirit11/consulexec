@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using ConsulExec.Design;
 using ConsulExec.Domain;
 using ConsulExec.ViewModel;
 using ReactiveUI;
@@ -73,8 +72,8 @@ namespace ConsulExec
 
             var connectionOptions = new ConnectionOptions { Name = "serv2", ServerAddress = "http://serv2" };
             CommandStartupViewModel.ConnectionProfiles.List.Add(
-                new ProfileViewModel<ConnectionOptions>(new ConnectionOptions { Name = "serv1", ServerAddress = "http://serv1" }, f => f.Name));
-            CommandStartupViewModel.ConnectionProfiles.List.Add(new ProfileViewModel<ConnectionOptions>(connectionOptions, f => f.Name));
+                ProfilesViewModelsFactory.Create(new ConnectionOptions { Name = "serv1", ServerAddress = "http://serv1" }));
+            CommandStartupViewModel.ConnectionProfiles.List.Add(ProfilesViewModelsFactory.Create(connectionOptions));
 
             CommandStartupViewModel.StartupOptionsProfiles.List.Add(
                 ProfilesViewModelsFactory.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt", Connection = connectionOptions }));

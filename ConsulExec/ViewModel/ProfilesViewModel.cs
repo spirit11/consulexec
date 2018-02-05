@@ -3,10 +3,11 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using ReactiveUI;
+using System.ComponentModel;
 
 namespace ConsulExec.ViewModel
 {
-    public interface IProfilesViewModel<T>
+    public interface IProfilesViewModel<T> : INotifyPropertyChanged
     {
         ReactiveList<T> List { get; }
         T Profile { get; set; }
