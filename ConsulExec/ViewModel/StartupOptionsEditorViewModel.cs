@@ -40,20 +40,22 @@ namespace ConsulExec.ViewModel
                 v => v.Connections.Profile,
                 (s, p) => !string.IsNullOrWhiteSpace(s) && p != null);
 
-            namesSubscription =
-                Connections.WhenAnyValue(v => v.Profile).Where(v => v != null).SelectMany(v => v.Options.Create().Nodes)
-                .StartWith(Enumerable.Repeat(new string[0], 1)) // initial values until first request is completed
+            namesSubscription = Connections.WhenAnyValue(v => v.Profile)
+                .Where(v => v != null)
+                .Select(v => v.Options.Create().Nodes)
+                .Switch()
+                .StartWith(new[] { Array.Empty<string>() }) // initial values until first request is completed
                 .Subscribe(names =>
                 {
                     var absentNames = Nodes.ToDictionary(n => n.Name, n => n);
-                    foreach (var name in names.OrderBy(v => v))
+                    foreach (var nodeName in names.OrderBy(v => v))
                     {
-                        if (!absentNames.ContainsKey(name))
-                            Nodes.Add(new NodeSelectorViewModel(name));
+                        if (!absentNames.ContainsKey(nodeName))
+                            Nodes.Add(new NodeSelectorViewModel(nodeName));
                         else
                         {
-                            absentNames[name].IsAbsent = false;
-                            absentNames.Remove(name);
+                            absentNames[nodeName].IsAbsent = false;
+                            absentNames.Remove(nodeName);
                         }
                     }
                     foreach (var node in absentNames.Values)
@@ -71,7 +73,10 @@ namespace ConsulExec.ViewModel
         protected override void OnDeactivate(bool Canceled)
         {
             if (!Canceled)
-                MapBack(options);
+            {
+                Options.Options = options.Clone();
+                MapBack(Options.Options);
+            }
             namesSubscription.Dispose();
             base.OnDeactivate(Canceled);
         }

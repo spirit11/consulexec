@@ -1,6 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ConsulExec.Domain;
 using ConsulExec.ViewModel;
@@ -17,8 +17,9 @@ namespace ConsulExec.Tests.ViewModel
             var remoteExec = Mock.Of<IRemoteExecution>(ir => ir.Nodes == Nodes);
             var co = Mock.Of<ConnectionOptions>(v => v.Create() == remoteExec);
 
-            var connections = Mock.Of<IProfilesViewModel<ProfileViewModel<ConnectionOptions>>>(
-                m => m.List == new ReactiveList<ProfileViewModel<ConnectionOptions>>(new[] { ProfilesViewModelsFactory.Create(co) }));
+            var connections = new ConnectionProfilesViewModel((o, e) => { },
+                    new UndoListViewModel(),
+                    new ReactiveList<ProfileViewModel<ConnectionOptions>>(new[] { ProfilesViewModelsFactory.Create(co) }));
 
             StartupOptionsProfileViewModel = ProfilesViewModelsFactory.Create(new SequentialStartupOptions(InitialNodes) { Connection = co, Name = OldName });
             Target = new StartupOptionsEditorViewModel(
@@ -59,24 +60,50 @@ namespace ConsulExec.Tests.ViewModel
         }
 
         [Test]
-        public void ReconnectingWhenNewServerSetUp()
+        public void SwitchSubscriptionWhenOtherConnectionSelected()
         {
-            var nodes = new BehaviorSubject<string[]>(new[] { "a", "b" });
-            CreateTarget(nodes, new string[0]);
+            CreateTarget(new BehaviorSubject<string[]>(new[] { "a", "b" }), new string[0]);
 
-            var fakeConnection = Mock.Of<IRemoteExecution>(
-                o => o.Nodes == new BehaviorSubject<string[]>(new[] { "c", "d", "e" }));
+            var nodes1 = new NodesRequestState(new[] { "c", "d", "e" });
+            var nodes2 = new NodesRequestState(new[] { "c2", "d2", "e2" });
 
-            var options = Mock.Of<ConnectionOptions>(
-                o => o.Create() == fakeConnection);
+            nodes1.SetProfile(Target.Connections);
+            nodes2.SetProfile(Target.Connections);
+            nodes1.NextNodes(new[] { "c" });
 
-            var connectionProfile = new ProfileViewModel<ConnectionOptions>(options, f => "Fake");
-            Target.Connections.List.Add(connectionProfile);
-            Target.Connections.Profile = connectionProfile;
+            Expect(nodes1.RequestsCount, EqualTo(1));
+            Expect(nodes2.RequestsCount, EqualTo(1));
+            Expect(Target.Nodes, Count.EqualTo(8));
 
-            Expect(Target.Nodes.Count, Is.EqualTo(3));
+            Mock.Get(nodes1.Options).VerifyAll();
+            Mock.Get(nodes2.Options).VerifyAll();
+        }
 
-            Mock.Get(options).VerifyAll();
+
+        private class NodesRequestState
+        {
+            public NodesRequestState(string[] NodeNames)
+            {
+                nodes = new BehaviorSubject<string[]>(NodeNames);
+                var observable = nodes.Do(_ => { RequestsCount++; });
+                var fakeConnection = Mock.Of<IRemoteExecution>(o => o.Nodes == observable);
+                Options = Mock.Of<ConnectionOptions>(o => o.Create() == fakeConnection);
+            }
+
+            public int RequestsCount { get; private set; }
+
+            public ConnectionOptions Options { get; }
+
+            public void SetProfile(IProfilesViewModel<ProfileViewModel<ConnectionOptions>> Profiles)
+            {
+                var connectionProfile = new ProfileViewModel<ConnectionOptions>(Options, f => "Fake");
+                Profiles.List.Add(connectionProfile);
+                Profiles.Profile = connectionProfile;
+            }
+
+            public void NextNodes(string[] Strings) => nodes.OnNext(Strings);
+
+            private readonly BehaviorSubject<string[]> nodes;
         }
     }
 
@@ -114,6 +141,18 @@ namespace ConsulExec.Tests.ViewModel
 
             Expect(Target.Name, EqualTo(NewName));
             Expect(StartupOptionsProfileViewModel.Options.Nodes, EquivalentTo(selectedNodeNames));
+        }
+
+        [Test]
+        public void OkInvokedOptionsUpdated()
+        {
+            var nodes = new Subject<string[]>();
+            CreateTarget(nodes, new string[0]);
+
+            var oldOptions = StartupOptionsProfileViewModel.Options;
+            Target.Name = "newname";
+            Target.OkCommand.Execute(null);
+            Expect(oldOptions, Not.SameAs(StartupOptionsProfileViewModel.Options));
         }
 
         private const string NewName = "new";

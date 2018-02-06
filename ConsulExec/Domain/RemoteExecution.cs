@@ -21,9 +21,9 @@ namespace ConsulExec.Domain
                 var client = await CreateClientAsync();
                 while (!ct.IsCancellationRequested)
                 {
-                    Debug.WriteLine("requesting nodes");
+                    Debug.WriteLine($"requesting nodes from {address}");
                     var nodes = await client.Agent.Members(false, ct);
-                    Debug.WriteLine("request completed");
+                    Debug.WriteLine($"request to {address} completed");
                     /*
                      
 1057		status := []MemberStatus{StatusNone, StatusAlive, StatusLeaving, StatusLeft, StatusFailed}

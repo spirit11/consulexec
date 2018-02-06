@@ -13,7 +13,6 @@ namespace ConsulExec
         {
             Policies.OnMissingFamily(new DefaultInterfaceImplementationPolicy());
 
-
             ForConcreteType<ReactiveList<ProfileViewModel<ConnectionOptions>>>().Configure.Singleton();
 
             For<ConnectionProfilesViewModel.OptionsFactoryDelegate>()
@@ -70,7 +69,7 @@ namespace ConsulExec
             CommandStartupViewModel.RecentCommands.Add("echo ok");
             CommandStartupViewModel.RecentCommands.Add("ping ya.ru");
 
-            var connectionOptions = new ConnectionOptions { Name = "serv2", ServerAddress = "http://serv2" };
+            var connectionOptions = new ConnectionOptions { Name = "serv2", ServerAddress = "http://192.168.1.101:8500" };
             CommandStartupViewModel.ConnectionProfiles.List.Add(
                 ProfilesViewModelsFactory.Create(new ConnectionOptions { Name = "serv1", ServerAddress = "http://serv1" }));
             CommandStartupViewModel.ConnectionProfiles.List.Add(ProfilesViewModelsFactory.Create(connectionOptions));

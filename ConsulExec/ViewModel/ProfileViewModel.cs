@@ -14,7 +14,11 @@ namespace ConsulExec.ViewModel
         public T Options
         {
             get { return options; }
-            set { options = value; this.RaisePropertyChanged(nameof(Name)); }
+            set
+            {
+                this.RaiseAndSetIfChanged(ref options, value);
+                this.RaisePropertyChanged(nameof(Name));
+            }
         }
         private T options;
 

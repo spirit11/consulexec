@@ -29,6 +29,8 @@ namespace ConsulExec.ViewModel
             return AddHandler(deleteCommand, Handler);
         }
 
+        protected T Options { get; }
+
         protected BaseOptionsEditorViewModel(T Options, IActivatingViewModel Activator)
         {
             this.Options = Options;
@@ -46,8 +48,6 @@ namespace ConsulExec.ViewModel
 
             deleteCommand = ReactiveCommand.Create(() => Deactivate(true), canDelete);
         }
-
-        protected T Options { get; }
 
         protected IObservable<bool> IsValid
         {
@@ -77,10 +77,10 @@ namespace ConsulExec.ViewModel
             return this;
         }
 
-        private void Deactivate(bool canceled)
+        private void Deactivate(bool Canceled)
         {
             activator?.Deactivate(this);
-            OnDeactivate(canceled);
+            OnDeactivate(Canceled);
         }
     }
 }
