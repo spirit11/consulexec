@@ -23,9 +23,13 @@ namespace ConsulExec.ViewModel
         public IProfileEditorViewModel<T> HandlingCancel(Action<T> Handler) =>
             AddHandler(cancelCommand, Handler);
 
-        public IProfileEditorViewModel<T> HandlingDelete(Action<T> Handler)
+        public IProfileEditorViewModel<T> HandlingDelete(Action<T> Handler, IObservable<bool> CanDelete = null)
         {
-            canDelete.OnNext(true);
+            IObservable<bool> src = new BehaviorSubject<bool>(true);
+            if (canDeleteSubscription != null)
+                throw new InvalidOperationException("HandlingDelete already set up");
+            canDeleteSubscription = (CanDelete ?? src).Subscribe(canDelete);
+
             return AddHandler(deleteCommand, Handler);
         }
 
@@ -58,7 +62,7 @@ namespace ConsulExec.ViewModel
 
         protected virtual void OnDeactivate(bool Canceled)
         {
-
+            canDeleteSubscription?.Dispose();
         }
 
         protected static void AssertNotNull<TArg>(TArg Argument, string ArgumentName)
@@ -70,6 +74,7 @@ namespace ConsulExec.ViewModel
 
         private readonly BehaviorSubject<bool> canDelete = new BehaviorSubject<bool>(false);
         private readonly IActivatingViewModel activator;
+        private IDisposable canDeleteSubscription;
 
         private BaseOptionsEditorViewModel<T> AddHandler(IObservable<Unit> Command, Action<T> Handler)
         {

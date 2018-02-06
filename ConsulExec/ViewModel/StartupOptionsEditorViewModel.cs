@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using ConsulExec.Domain;
+using ConsulExec.Infrastructure;
 using Splat;
 
 namespace ConsulExec.ViewModel
@@ -42,8 +43,8 @@ namespace ConsulExec.ViewModel
 
             namesSubscription = Connections.WhenAnyValue(v => v.Profile)
                 .Where(v => v != null)
-                .Select(v => v.Options.Create().Nodes)
-                .Switch()
+                .SelectNSwitch(v => v.WhenAnyValue(o => o.Options))
+                .SelectNSwitch(v => v.Create().Nodes)
                 .StartWith(new[] { Array.Empty<string>() }) // initial values until first request is completed
                 .Subscribe(names =>
                 {

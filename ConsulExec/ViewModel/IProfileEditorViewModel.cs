@@ -6,6 +6,6 @@ namespace ConsulExec.ViewModel
     {
         IProfileEditorViewModel<T> HandlingOk(Action<T> Handler);
         IProfileEditorViewModel<T> HandlingCancel(Action<T> Handler);
-        IProfileEditorViewModel<T> HandlingDelete(Action<T> Handler);
+        IProfileEditorViewModel<T> HandlingDelete(Action<T> Handler, IObservable<bool> CanDelete = null);
     }
 }

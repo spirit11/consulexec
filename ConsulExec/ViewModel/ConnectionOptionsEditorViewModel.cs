@@ -41,16 +41,11 @@ namespace ConsulExec.ViewModel
         protected override void OnDeactivate(bool Canceled)
         {
             if (!Canceled)
-            {
-                Options.Options
-                    = new ConnectionOptions
-                    {
-                        Name = Name,
-                        ServerAddress = ServerAddress
-                    };
-                //    .Name = Name;
-                //Options.Options.ServerAddress = ServerAddress;
-            }
+                Options.Options = new ConnectionOptions
+                {
+                    Name = Name,
+                    ServerAddress = ServerAddress
+                };
             base.OnDeactivate(Canceled);
         }
 

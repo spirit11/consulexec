@@ -1,5 +1,4 @@
 ﻿using System;
-using ConsulExec.Design;
 
 namespace ConsulExec.Domain
 {
