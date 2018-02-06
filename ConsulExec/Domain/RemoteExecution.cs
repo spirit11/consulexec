@@ -30,7 +30,8 @@ namespace ConsulExec.Domain
 1058		expect := []string{"none", "alive", "leaving", "left", "failed"}
                      */
                     //nodes.Response.First().Status
-                    o.OnNext(nodes.Response.Where(v => v.Status == 1).Select(v => v.Name).ToArray());
+                    if (nodes.Response != null) // omg, it can be null !
+                        o.OnNext(nodes.Response.Where(v => v.Status == 1).Select(v => v.Name).ToArray());
                     await Task.Delay(1000, ct);
                 }
             }).Retry(TimeSpan.FromSeconds(2)).Publish().RefCount();
