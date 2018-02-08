@@ -26,18 +26,12 @@
             <Button Command="{Binding DeleteCommand}" Content="Delete"/>
         </UniformGrid>
 
-        <ListBox ItemsSource="{Binding Nodes}" Margin="12" SelectionMode="Extended">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="{x:Type ListBoxItem}">
-                    <!--<EventSetter Event="Unselected" Handler=""/>
-                    <EventSetter Event="Selected" Handler=""/>-->
-                    <!--<Setter Property="ListBox.IsSelected" Value="{Binding Connections}"/>-->
-                </Style>
-            </ListBox.ItemContainerStyle>
+        <ListBox Name="lb" ItemsSource="{Binding Nodes}" Margin="12" SelectionMode="Extended">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="vm:NodeSelectorViewModel">
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox IsChecked="{Binding IsChecked}" i:MultiCheck.Group="check"/>
+                        <CheckBox IsChecked="{Binding IsChecked}" 
+                                  i:MultiCheck.Apply="True"/>
                         <TextBlock Text="{Binding Name}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
