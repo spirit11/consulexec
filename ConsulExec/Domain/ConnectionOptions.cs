@@ -1,4 +1,5 @@
 ﻿using System;
+using ConsulExec.Design;
 
 namespace ConsulExec.Domain
 {
@@ -12,6 +13,6 @@ namespace ConsulExec.Domain
             new ConnectionOptions { Name = Name, ServerAddress = ServerAddress };
 
         public virtual IRemoteExecution Create() => 
-            new RemoteExecution(ServerAddress);
+            new FakeRemoteExecution(ServerAddress);
     }
 }

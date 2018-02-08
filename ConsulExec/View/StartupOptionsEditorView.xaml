@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ConsulExec.View"
              xmlns:vm="clr-namespace:ConsulExec.ViewModel"
+             xmlns:i="clr-namespace:ConsulExec.Infrastructure"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:StartupOptionsEditorViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -25,11 +26,18 @@
             <Button Command="{Binding DeleteCommand}" Content="Delete"/>
         </UniformGrid>
 
-        <ListBox ItemsSource="{Binding Nodes}" Margin="12">
+        <ListBox ItemsSource="{Binding Nodes}" Margin="12" SelectionMode="Extended">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <!--<EventSetter Event="Unselected" Handler=""/>
+                    <EventSetter Event="Selected" Handler=""/>-->
+                    <!--<Setter Property="ListBox.IsSelected" Value="{Binding Connections}"/>-->
+                </Style>
+            </ListBox.ItemContainerStyle>
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="vm:NodeSelectorViewModel">
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox IsChecked="{Binding IsChecked}"/>
+                        <CheckBox IsChecked="{Binding IsChecked}" i:MultiCheck.Group="check"/>
                         <TextBlock Text="{Binding Name}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">

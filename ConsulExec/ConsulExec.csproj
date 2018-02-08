@@ -151,6 +151,7 @@
     <Compile Include="View\CommandStartupView.xaml.cs">
       <DependentUpon>CommandStartupView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\MultiCheck.cs" />
     <Compile Include="View\NodeRunView.xaml.cs">
       <DependentUpon>NodeRunView.xaml</DependentUpon>
     </Compile>
