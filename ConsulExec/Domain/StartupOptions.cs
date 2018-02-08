@@ -48,11 +48,20 @@ namespace ConsulExec.Domain
             return clone;
         }
 
-        public override IObservable<ITaskRun> Construct(string Command) =>
-            Nodes.ToObservable()
-            .Process(name => Connection.Create().Execute(Observable.Return(new NodeExecutionTask(Command, NamePattern: $"^{name}$"))),
-                    t => t.SelectMany(v => v.ReturnCode.Select(_ => true)).All(b => b))
-            .Concat().Publish().RefCount();
+        public override IObservable<ITaskRun> Construct(string Command) => 
+            Observable.Using(() => Connection.Create(),
+                endpoint => HandleTasks(Command, endpoint))
+            .Publish().RefCount();
+
+        private IObservable<ITaskRun> HandleTasks(string Command, IRemoteExecution Endpoint) => Nodes.ToObservable()
+            .Process(name => 
+                Endpoint.Execute(
+                    Observable.Return(new NodeExecutionTask(Command, NamePattern: $"^{name}$"))),
+                    AllRunsAreCompleted)
+            .Concat();
+
+        private static IObservable<bool> AllRunsAreCompleted(IObservable<ITaskRun> Runs) =>
+            Runs.SelectMany(v => v.ReturnCode.Select(_ => true)).All(b => b);
 
         private string[] nodes;
     }

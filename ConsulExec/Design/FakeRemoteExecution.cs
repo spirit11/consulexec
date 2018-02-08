@@ -19,7 +19,7 @@ namespace ConsulExec.Design
                 var nodes = new List<string> { "blinking" };
                 while (!ct.IsCancellationRequested)
                 {
-                    Debug.WriteLine("requesting nodes");
+                    Debug.WriteLine("FakeRemoteExecution: requesting nodes");
 
                     await Task.Delay(100, ct);
 
@@ -30,7 +30,7 @@ namespace ConsulExec.Design
                     if (idx % 8 == 0)
                         throw new Exception("Transient exception");
 
-                    Debug.WriteLine("request completed");
+                    Debug.WriteLine("FakeRemoteExecution: request completed");
                     o.OnNext(nodes.ToArray());
                     try
                     {
@@ -49,6 +49,11 @@ namespace ConsulExec.Design
 
         public IObservable<ITaskRun> Execute(IObservable<NodeExecutionTask> Tasks) =>
             Tasks.Select(t => FakeTaskRun.Create(t, address));
+
+        public void Dispose()
+        {
+            Debug.WriteLine("FakeRemoteExecution: disposed");
+        }
 
         private readonly string address;
     }

@@ -2,7 +2,7 @@
 
 namespace ConsulExec.Domain
 {
-    public interface IRemoteExecution
+    public interface IRemoteExecution : IDisposable
     {
         IObservable<string[]> Nodes { get; }
         IObservable<ITaskRun> Execute(IObservable<NodeExecutionTask> Tasks);

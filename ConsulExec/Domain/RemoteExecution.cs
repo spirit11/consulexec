@@ -16,41 +16,52 @@ namespace ConsulExec.Domain
     {
         public RemoteExecution(string ServerAddress = "http://localhost:8500")
         {
+            address = new Uri(ServerAddress);
+            client = new Lazy<ConsulClient>(() => new ConsulClient(config => { config.Address = address; }), LazyThreadSafetyMode.ExecutionAndPublication);
+
             Nodes = Observable.Create<string[]>(async (o, ct) =>
             {
-                var client = await CreateClientAsync();
-                while (!ct.IsCancellationRequested)
+                using (var client = await CreateClientAsync())
                 {
-                    Debug.WriteLine($"requesting nodes from {address}");
-                    var nodes = await client.Agent.Members(false, ct);
-                    Debug.WriteLine($"request to {address} completed");
-                    /*
+                    while (!ct.IsCancellationRequested)
+                    {
+                        Debug.WriteLine($"requesting nodes from {address}");
+                        var nodes = await client.Agent.Members(false, ct);
+                        Debug.WriteLine($"request to {address} completed");
+                        /*
                      
 1057		status := []MemberStatus{StatusNone, StatusAlive, StatusLeaving, StatusLeft, StatusFailed}
 1058		expect := []string{"none", "alive", "leaving", "left", "failed"}
                      */
-                    //nodes.Response.First().Status
-                    if (nodes.Response != null) // omg, it can be null !
-                        o.OnNext(nodes.Response.Where(v => v.Status == 1).Select(v => v.Name).ToArray());
-                    await Task.Delay(1000, ct);
+                        //nodes.Response.First().Status
+                        if (nodes.Response != null) // omg, it can be null !
+                            o.OnNext(nodes.Response.Where(v => v.Status == 1).Select(v => v.Name).ToArray());
+                        await Task.Delay(1000, ct);
+                    }
                 }
             }).Retry(TimeSpan.FromSeconds(2)).Publish().RefCount();
-            address = new Uri(ServerAddress);
         }
 
         public IObservable<string[]> Nodes { get; }
 
         public IObservable<ITaskRun> Execute(IObservable<NodeExecutionTask> Tasks)
         {
-            return Observable.Create<ITaskRun>(async (o, ct) => await new ConsulRun(address) { Tasks = Tasks, Observer = o, Token = ct }.Run())
+            return Observable.Create<ITaskRun>(async (o, ct) => await new ConsulRun(client) { Tasks = Tasks, Observer = o, Token = ct }.Run())
                 .Publish().RefCount();
         }
 
+        public void Dispose()
+        {
+            if (client.IsValueCreated)
+                client.Value.Dispose();
+        }
+
+
         private class ConsulRun
         {
-            public ConsulRun(Uri Address)
+            public ConsulRun(Lazy<ConsulClient> Client)
             {
-                client = new Lazy<ConsulClient>(() => new ConsulClient(config => { config.Address = Address; }));
+                client = Client;
             }
 
             public IObservable<NodeExecutionTask> Tasks;
@@ -63,7 +74,7 @@ namespace ConsulExec.Domain
 
                 try
                 {
-                    bool firstLoop = true;
+                    var firstLoop = true;
                     while (sessions.Any() || !taskSourceCompleted || nodeExecutionTasks.Any())
                     {
                         await RetryPolicy(async () => await Loop(firstLoop));
@@ -78,6 +89,7 @@ namespace ConsulExec.Domain
                 finally
                 {
                     tasksSubscription.Dispose();
+                    //Client.Dispose();
                 }
                 return Disposable.Empty;
             }
@@ -197,6 +209,7 @@ namespace ConsulExec.Domain
             private IDictionary<string, TaskRun> GetNodesForTask(NodeExecutionTask SessionKey) => taskruns.GetOrAdd(SessionKey);
         }
 
+
         private static async Task<string[]> RequestSessionKeys(ConsulClient local, string session, CancellationToken ct)
         {
             return (await local.KV.Keys($"_rexec/{session}/", ct)).Response;
@@ -232,6 +245,7 @@ namespace ConsulExec.Domain
         }
 
         private readonly Uri address;
+        private readonly Lazy<ConsulClient> client;
 
         private async Task<ConsulClient> CreateClientAsync() => await Task.Run(() => CreateClient());
 
