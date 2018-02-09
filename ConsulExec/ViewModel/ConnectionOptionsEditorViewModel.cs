@@ -16,9 +16,12 @@ namespace ConsulExec.ViewModel
             Name = "http://www.www.www";
         }
 
-        public ConnectionOptionsEditorViewModel(ProfileViewModel<ConnectionOptions> Options, IActivatingViewModel Activator)
+        public ConnectionOptionsEditorViewModel(ProfileViewModel<ConnectionOptions> Options,
+            ConnectionOptionsFactoryDelegate ConnectionOptionsFactory,
+            IActivatingViewModel Activator)
             : base(Options, Activator)
         {
+            connectionOptionsFactory = ConnectionOptionsFactory;
             Map(Options.Options);
             IsValid = this.WhenAnyValue(v => v.Name,
                 v => v.ServerAddress,
@@ -41,13 +44,15 @@ namespace ConsulExec.ViewModel
         protected override void OnDeactivate(bool Canceled)
         {
             if (!Canceled)
-                Options.Options = new ConnectionOptions
-                {
-                    Name = Name,
-                    ServerAddress = ServerAddress
-                };
+            {
+                Options.Options = connectionOptionsFactory(Name);
+                Options.Options.ServerAddress = ServerAddress;
+            }
+
             base.OnDeactivate(Canceled);
         }
+
+        private readonly ConnectionOptionsFactoryDelegate connectionOptionsFactory;
 
         private void Map(ConnectionOptions ConnectionOptions)
         {

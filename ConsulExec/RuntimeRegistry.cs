@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using ConsulExec.Design;
 using ConsulExec.Domain;
 using ConsulExec.ViewModel;
 using ReactiveUI;
@@ -15,12 +16,13 @@ namespace ConsulExec
 
             ForConcreteType<ReactiveList<ProfileViewModel<ConnectionOptions>>>().Configure.Singleton();
 
-            For<ConnectionProfilesViewModel.OptionsFactoryDelegate>()
-                .Use(new ConnectionProfilesViewModel.OptionsFactoryDelegate(Name => new ConnectionOptions { Name = Name }));
+            For<ConnectionOptionsFactoryDelegate>()
+                //.Use(new ConnectionOptionsFactoryDelegate(Name => new ConnectionOptions { Name = Name }));
+                .Use(new ConnectionOptionsFactoryDelegate(Name => new FakeConnectionOptions { Name = Name }));
             For<IEditorsFabric>().Use<EditorsFabric>();
 
-            For<StartupOptionsProfilesViewModel.OptionsFabricDelegate>()
-                .Use(new StartupOptionsProfilesViewModel.OptionsFabricDelegate(Name => new SequentialStartupOptions(Array.Empty<string>()) { Name = Name }));
+            For<StartupOptionsFabricDelegate>()
+                .Use(new StartupOptionsFabricDelegate(Name => new SequentialStartupOptions(Array.Empty<string>()) { Name = Name }));
 
             ForConcreteType<ConnectionProfilesViewModel>()
                 .Configure
@@ -47,8 +49,9 @@ namespace ConsulExec
                 .Configure
                 .Ctor<Action<StartupOptions, string>>()
                 .IsNamedInstance("executeCommandHandler")
-                .OnCreation(Model => FillTestData(Model));
+                .OnCreation((context, Model) => FillTestData(context, Model));
         }
+
 
         private static Action<StartupOptions, string> StartCommand(IContext Context) =>
             (options, command) =>
@@ -61,22 +64,33 @@ namespace ConsulExec
                 );
             };
 
-
         [Conditional("DEBUG")]
-        private static void FillTestData(CommandStartupViewModel CommandStartupViewModel)
+        private static void FillTestData(IContext Context, CommandStartupViewModel CommandStartupViewModel)
         {
             CommandStartupViewModel.Command = "echo ok";
             CommandStartupViewModel.RecentCommands.Add("echo ok");
             CommandStartupViewModel.RecentCommands.Add("ping ya.ru");
 
-            var connectionOptions = new ConnectionOptions { Name = "serv2", ServerAddress = "http://192.168.1.101:8500" };
+            var fabric = Context.GetInstance<ConnectionOptionsFactoryDelegate>();
+
+            var connectionOptions = ConstructConnectionOptions("serv2", "http://192.168.1.101:8500", fabric);
+
             CommandStartupViewModel.ConnectionProfiles.List.Add(
-                ProfilesViewModelsFactory.Create(new ConnectionOptions { Name = "serv1", ServerAddress = "http://serv1" }));
+                ProfilesViewModelsFactory.Create(ConstructConnectionOptions("serv1", "http://serv1", fabric)));
             CommandStartupViewModel.ConnectionProfiles.List.Add(ProfilesViewModelsFactory.Create(connectionOptions));
 
             CommandStartupViewModel.StartupOptionsProfiles.List.Add(
                 ProfilesViewModelsFactory.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt", Connection = connectionOptions }));
             CommandStartupViewModel.StartupOptionsProfiles.Profile = CommandStartupViewModel.StartupOptionsProfiles.List[0];
+        }
+
+        private static ConnectionOptions ConstructConnectionOptions(string Name,
+            string ServerAddress,
+            ConnectionOptionsFactoryDelegate Fabric)
+        {
+            var result = Fabric(Name);
+            result.ServerAddress = ServerAddress;
+            return result;
         }
     }
 }

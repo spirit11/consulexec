@@ -5,22 +5,23 @@ namespace ConsulExec.ViewModel
 {
     using ConnectionOptionsViewModel = ProfileViewModel<ConnectionOptions>;
 
+
+    public delegate ConnectionOptions ConnectionOptionsFactoryDelegate(string Name);
+
+
     public class ConnectionProfilesViewModel : ProfilesViewModel<ConnectionOptionsViewModel>
     {
-        public delegate ConnectionOptions OptionsFactoryDelegate(string Name);
-
-
         public ConnectionProfilesViewModel(EditProfileDelegate EditProfile, 
             UndoListViewModel UndoList,
             ReactiveList<ConnectionOptionsViewModel> Profiles,
-            OptionsFactoryDelegate OptionsFactory = null)
+            ConnectionOptionsFactoryDelegate ConnectionOptionsFactory = null)
             : base(EditProfile, UndoList, Profiles)
         {
-            optionsFactory = OptionsFactory ?? (newName => new ConnectionOptions { Name = newName });
+            connectionOptionsFactory = ConnectionOptionsFactory ?? (newName => new ConnectionOptions { Name = newName });
         }
 
         protected override ConnectionOptionsViewModel CreateProfile(string NewName) =>
-            ProfilesViewModelsFactory.Create(optionsFactory(NewName));
+            ProfilesViewModelsFactory.Create(connectionOptionsFactory(NewName));
 
         protected override void Restore(ConnectionOptionsViewModel EditStartupOptionsProfile, object O) =>
             EditStartupOptionsProfile.Options = (ConnectionOptions)O;
@@ -28,6 +29,7 @@ namespace ConsulExec.ViewModel
         protected override object Backup(ConnectionOptionsViewModel EditStartupOptionsProfile) =>
             EditStartupOptionsProfile.Options.Clone();
 
-        private readonly OptionsFactoryDelegate optionsFactory;
+        private readonly ConnectionOptionsFactoryDelegate connectionOptionsFactory;
     }
+
 }

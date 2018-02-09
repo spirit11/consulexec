@@ -48,13 +48,13 @@ namespace ConsulExec.Domain
             return clone;
         }
 
-        public override IObservable<ITaskRun> Construct(string Command) => 
+        public override IObservable<ITaskRun> Construct(string Command) =>
             Observable.Using(() => Connection.Create(),
                 endpoint => HandleTasks(Command, endpoint))
             .Publish().RefCount();
 
         private IObservable<ITaskRun> HandleTasks(string Command, IRemoteExecution Endpoint) => Nodes.ToObservable()
-            .Process(name => 
+            .Process(name =>
                 Endpoint.Execute(
                     Observable.Return(new NodeExecutionTask(Command, NamePattern: $"^{name}$"))),
                     AllRunsAreCompleted)
