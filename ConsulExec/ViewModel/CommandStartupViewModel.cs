@@ -1,5 +1,6 @@
 ﻿using ReactiveUI;
 using System;
+using System.Collections.Generic;
 using System.Windows.Input;
 using ConsulExec.Domain;
 
@@ -17,8 +18,8 @@ namespace ConsulExec.ViewModel
             ExecuteCommand = ReactiveCommand.Create(() =>
             {
                 var cmd = Command;
-                RecentCommands.Remove(cmd);
-                RecentCommands.Add(cmd);
+                recentCommands.Remove(cmd);
+                recentCommands.Add(cmd);
                 Command = cmd;
                 RunCommand?.Invoke(StartupOptionsProfiles.Profile.Options, cmd);
             }, this.WhenAnyValue(v => v.Command, v => v.StartupOptionsProfiles.Profile, (cmd, opt) => !string.IsNullOrWhiteSpace(cmd) && opt != null));
@@ -26,14 +27,19 @@ namespace ConsulExec.ViewModel
             SetCommandCommand = ReactiveCommand.Create<string>(s => Command = s);
         }
 
-        public string Command { get { return command; } set { this.RaiseAndSetIfChanged(ref command, value); } } // CommandViewModel
+        public string Command { get { return command; } set { this.RaiseAndSetIfChanged(ref command, value); } } //TODO perhaps CommandViewModel
         private string command;
 
-        public ReactiveList<string> RecentCommands { get; } = new ReactiveList<string>();
+        public IReactiveDerivedList<string> RecentCommands => recentCommands.CreateDerivedCollection(v => v);
+        private readonly ReactiveList<string> recentCommands = new ReactiveList<string>();
 
         public ConnectionProfilesViewModel ConnectionProfiles { get; }
 
         public StartupOptionsProfilesViewModel StartupOptionsProfiles { get; }
+
+        public void ClearRecentCommands() => recentCommands.Clear();
+
+        public void AddRecentCommands(IEnumerable<string> Cmds) => recentCommands.AddRange(Cmds);
 
         #region Commands
 

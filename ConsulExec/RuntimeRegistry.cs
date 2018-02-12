@@ -68,8 +68,11 @@ namespace ConsulExec
         private static void FillTestData(IContext Context, CommandStartupViewModel CommandStartupViewModel)
         {
             CommandStartupViewModel.Command = "echo ok";
-            CommandStartupViewModel.RecentCommands.Add("echo ok");
-            CommandStartupViewModel.RecentCommands.Add("ping ya.ru");
+            CommandStartupViewModel.AddRecentCommands(new[]
+            {
+                "echo ok",
+                "ping ya.ru"
+            });
 
             var fabric = Context.GetInstance<ConnectionOptionsFactoryDelegate>();
 
