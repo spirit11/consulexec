@@ -44,6 +44,7 @@ namespace ConsulExec.ViewModel
             namesSubscription = Connections.WhenAnyValue(v => v.Profile)
                 .Where(v => v != null)
                 .SelectNSwitch(v => v.WhenAnyValue(o => o.Options))
+                .Do(_ => Nodes.Where(n => !n.IsChecked).ToList().ForEach(node => Nodes.Remove(node)))
                 .SelectNSwitch(v => v.Create().Nodes)
                 .StartWith(new[] { Array.Empty<string>() }) // initial values until first request is completed
                 .Subscribe(names =>

@@ -25,7 +25,7 @@ namespace ConsulExec.ViewModel
         public ConnectionProfilesViewModel ConnectionProfiles { get; }
 
         protected override StartupOptionsViewModel CreateProfile(string NewName) =>
-            ProfilesViewModelsFactory.Create(startupOptionsFabric(NewName));
+            ProfileViewModelsFabric.Create(startupOptionsFabric(NewName));
 
         protected override void Restore(StartupOptionsViewModel EditStartupOptionsProfile, object O) =>
             EditStartupOptionsProfile.Options = (SequentialStartupOptions)O;

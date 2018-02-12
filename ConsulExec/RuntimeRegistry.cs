@@ -18,7 +18,7 @@ namespace ConsulExec
 
             For<ConnectionOptionsFactoryDelegate>()
                 //.Use(new ConnectionOptionsFactoryDelegate(Name => new ConnectionOptions { Name = Name }));
-                .Use(new ConnectionOptionsFactoryDelegate(Name => new FakeConnectionOptions { Name = Name }));
+                .Use(new ConnectionOptionsFactoryDelegate(Name => new FakeConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500"}));
             For<IEditorsFabric>().Use<EditorsFabric>();
 
             For<StartupOptionsFabricDelegate>()
@@ -76,11 +76,11 @@ namespace ConsulExec
             var connectionOptions = ConstructConnectionOptions("serv2", "http://192.168.1.101:8500", fabric);
 
             CommandStartupViewModel.ConnectionProfiles.List.Add(
-                ProfilesViewModelsFactory.Create(ConstructConnectionOptions("serv1", "http://serv1", fabric)));
-            CommandStartupViewModel.ConnectionProfiles.List.Add(ProfilesViewModelsFactory.Create(connectionOptions));
+                ProfileViewModelsFabric.Create(ConstructConnectionOptions("serv1", "http://serv1", fabric)));
+            CommandStartupViewModel.ConnectionProfiles.List.Add(ProfileViewModelsFabric.Create(connectionOptions));
 
             CommandStartupViewModel.StartupOptionsProfiles.List.Add(
-                ProfilesViewModelsFactory.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt", Connection = connectionOptions }));
+                ProfileViewModelsFabric.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt", Connection = connectionOptions }));
             CommandStartupViewModel.StartupOptionsProfiles.Profile = CommandStartupViewModel.StartupOptionsProfiles.List[0];
         }
 

@@ -50,7 +50,7 @@ namespace ConsulExec.Tests.ViewModel
             var options = new SequentialStartupOptions(new string[0]);
             var startupOptionsProfilesViewModel = new StartupOptionsProfilesViewModel(null, null, null, new ReactiveList<ProfileViewModel<StartupOptions>>())
             {
-                Profile = ProfilesViewModelsFactory.Create(options)
+                Profile = ProfileViewModelsFabric.Create(options)
             };
             var target = new CommandStartupViewModel(new ConnectionProfilesViewModel(null, null, null),
                 startupOptionsProfilesViewModel,

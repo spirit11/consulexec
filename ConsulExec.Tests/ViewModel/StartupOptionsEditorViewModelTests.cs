@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -12,26 +13,45 @@ namespace ConsulExec.Tests.ViewModel
 {
     public abstract class StartupOptionsEditorViewModelTestsBase : AssertionHelper
     {
-        protected void CreateTarget(IObservable<string[]> Nodes, string[] InitialNodes)
+        public static ConnectionOptions GetConnectionOptionsReturningNodes(IObservable<string[]> NodeNames)
         {
-            var remoteExec = Mock.Of<IRemoteExecution>(ir => ir.Nodes == Nodes);
-            var co = Mock.Of<ConnectionOptions>(v => v.Create() == remoteExec);
-
-            var connections = new ConnectionProfilesViewModel((o, e) => { },
-                    new UndoListViewModel(),
-                    new ReactiveList<ProfileViewModel<ConnectionOptions>>(new[] { ProfilesViewModelsFactory.Create(co) }));
-
-            StartupOptionsProfileViewModel = ProfilesViewModelsFactory.Create(new SequentialStartupOptions(InitialNodes) { Connection = co, Name = OldName });
-            Target = new StartupOptionsEditorViewModel(
-                StartupOptionsProfileViewModel,
-                connections,
-                null);
+            var execMock = Mock.Of<IRemoteExecution>(re => re.Nodes == NodeNames);
+            return Mock.Of<ConnectionOptions>(o => o.Create() == execMock);
         }
 
         protected StartupOptionsEditorViewModel Target { get; private set; }
+
         protected ProfileViewModel<StartupOptions> StartupOptionsProfileViewModel { get; private set; }
 
+        protected void CreateTarget(IObservable<string[]> Nodes, string[] InitialNodes)
+        {
+            var co = GetConnectionOptionsReturningNodes(Nodes);
+            CreateTarget(InitialNodes, co, new[] { ProfileViewModelsFabric.Create(co) });
+        }
+
+        protected void CreateTarget(string[][] NodeNamesForConnection, string[] InitialNodes)
+        {
+            var options = NodeNamesForConnection.Select(GetConnectionOptionsReturningNodes).ToArray();
+            CreateTarget(InitialNodes, options.First(), options.Select(c => new ProfileViewModel<ConnectionOptions>(c, cc => cc.Name)));
+        }
+
+        protected static ConnectionOptions GetConnectionOptionsReturningNodes(string[] NodeNames) =>
+            GetConnectionOptionsReturningNodes(new BehaviorSubject<string[]>(NodeNames));
+
         private const string OldName = "old";
+
+        private void CreateTarget(string[] InitialNodes, ConnectionOptions co, IEnumerable<ProfileViewModel<ConnectionOptions>> ProfileViewModels)
+        {
+            var connections = new ConnectionProfilesViewModel((o, e) => { },
+                new UndoListViewModel(),
+                new ReactiveList<ProfileViewModel<ConnectionOptions>>(ProfileViewModels));
+            StartupOptionsProfileViewModel = ProfileViewModelsFabric.Create(
+                new SequentialStartupOptions(InitialNodes) { Connection = co, Name = OldName });
+            Target = new StartupOptionsEditorViewModel(
+                StartupOptionsProfileViewModel,
+                connections,
+                Mock.Of<IActivatingViewModel>());
+        }
     }
 
 
@@ -73,12 +93,34 @@ namespace ConsulExec.Tests.ViewModel
 
             Expect(nodes1.RequestsCount, EqualTo(1));
             Expect(nodes2.RequestsCount, EqualTo(1));
-            Expect(Target.Nodes, Count.EqualTo(8));
+            Expect(Target.Nodes, Count.EqualTo(3));
 
             Mock.Get(nodes1.Options).VerifyAll();
             Mock.Get(nodes2.Options).VerifyAll();
         }
 
+        [Test]
+        public void WhenConnectionUpdatedUnselectedNodesRemovedSelectedPersist()
+        {
+            CreateTarget(new[] { new[] { "a", "b" }, new[] { "c" } }, new[] { "a" });
+            var connectionProfiles = Target.Connections;
+
+            Expect(NamesOf(Target.Nodes), EquivalentTo(new[] { "a", "b" }));
+
+            connectionProfiles.Profile = connectionProfiles.List.Last();
+
+            Expect(NamesOf(Target.Nodes), EquivalentTo(new[] { "a", "c" }));
+            Expect(Target.Nodes.First(n => n.Name == "a").IsAbsent, True);
+
+            connectionProfiles.Profile.Options = GetConnectionOptionsReturningNodes(new[] { "a", "d" });
+
+            Expect(NamesOf(Target.Nodes), EquivalentTo(new[] { "a", "d" }));
+            Expect(Target.Nodes.First(n => n.Name == "a").IsAbsent, False);
+        }
+
+
+        private static IEnumerable<string> NamesOf(IEnumerable<NodeSelectorViewModel> TargetNodes) =>
+            TargetNodes.Select(n => n.Name);
 
         private class NodesRequestState
         {
