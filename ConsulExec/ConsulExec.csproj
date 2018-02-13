@@ -45,6 +45,10 @@
       <HintPath>..\packages\MahApps.Metro.1.5.0\lib\net45\MahApps.Metro.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="ReactiveUI, Version=7.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\reactiveui-core.7.4.0\lib\Net45\ReactiveUI.dll</HintPath>
       <Private>True</Private>
@@ -113,6 +117,7 @@
     <Compile Include="DefaultInterfaceImplementationPolicy.cs" />
     <Compile Include="Design\FakeConnectionOptions.cs" />
     <Compile Include="Design\FakeTaskRun.cs" />
+    <Compile Include="Domain\Configuration.cs" />
     <Compile Include="Domain\ConnectionOptions.cs" />
     <Compile Include="Infrastructure\ConventionalViewLocator.cs" />
     <Compile Include="Design\FakeRemoteExecution.cs" />
