@@ -102,6 +102,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EndToEnd\Application.cs" />
     <Compile Include="EndToEnd\EndToEndTests.cs" />
     <Compile Include="Util\CollectionProperties.cs" />
     <Compile Include="Infrastructure\RetryPatternsTests.cs" />

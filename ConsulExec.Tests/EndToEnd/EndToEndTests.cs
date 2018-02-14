@@ -1,13 +1,7 @@
 ﻿using System.Configuration;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using FlaUI.Core;
-using FlaUI.Core.AutomationElements;
-using FlaUI.Core.AutomationElements.Infrastructure;
-using FlaUI.Core.Definitions;
-using FlaUI.UIA3;
 using NUnit.Framework;
 
 namespace ConsulExec.Tests.EndToEnd
@@ -35,42 +29,37 @@ namespace ConsulExec.Tests.EndToEnd
 
         [Test]
         [Explicit]
-        public void Test()
+        public void RunCommandOnLocalServer()
         {
-            var app = Application.Launch(Path.Combine(TestContext.CurrentContext.TestDirectory, "ConsulExec.exe"));
-            Task.Delay(1000).Wait();
-
-            using (var automation = new UIA3Automation())
+            using (application = new Application(Path.Combine(TestContext.CurrentContext.TestDirectory, "ConsulExec.exe")))
             {
-                window = app.GetMainWindow(automation);
+                Task.Delay(1000).Wait();
 
-                AddNewProfile();
+                application.AddNewProfile();
 
-                AddNewConnection();
+                application.AddNewConnection();
 
-                EnterLocalhostAddress();
+                application.EnterLocalhostAddress($"http://localhost:{HttpApiPort}");
 
-                var checkboxes = WaitForNodesCheckboxes();
+                var checkboxes = application.WaitForNodesCheckboxes();
 
-                Expect(checkboxes?.Length, GreaterThan(0), "No checkboxes for nodes are found");
+                Expect(() => checkboxes = application.WaitForNodesCheckboxes(), 
+                    Length.GreaterThan(0).After(3000).PollEvery(100),
+                    "No checkboxes for nodes are found");
 
-                SelectAllNodes(checkboxes);
+                application.SelectAllNodes(checkboxes);
 
-                AcceptSettings();
+                application.AcceptSettings();
 
-                window.FindAllDescendants(c => c.ByControlType(ControlType.ComboBox)).Last().AsComboBox().EditableText =
-                    $"echo {EchoString}";
+                application.EnterCommand($"echo {EchoString}");
 
-                window.FindAllDescendants(c => c.ByName("Execute")).Last().AsButton().Click();
+                application.ClickExecute();
 
-                Task.Delay(3000).Wait();
+                Expect(() => application.GetAllTextBoxesText(), 
+                    Some.Contains("Completed").And.Some.Contains(EchoString).After(3000).PollEvery(100),
+                    "No results are repoted in UI");
 
-                var textBoxes = window.FindAllDescendants(t => t.ByControlType(ControlType.Text));
-
-                Expect(textBoxes.Select(t => t.AsLabel().Text),
-                    Some.Contains("Completed").And.Some.Contains(EchoString));
-
-                window.Close();
+                application.Close();
             }
         }
 
@@ -89,53 +78,7 @@ namespace ConsulExec.Tests.EndToEnd
         private static string ConsulConfigFileName =>
              Path.Combine(TestContext.CurrentContext.TestDirectory, "test_server_config.json");
 
-
-        private Window window;
         private Process consulProcess;
-
-        private void AddNewProfile()
-        {
-            var addButton = window.FindAllDescendants(c => c.ByName("Add").And(c.ByControlType(ControlType.Button)));
-            addButton.First().Click();
-            Task.Delay(100).Wait();
-        }
-
-        private void AddNewConnection()
-        {
-            var addButton = window.FindAllDescendants(c => c.ByName("Add").And(c.ByControlType(ControlType.Button)));
-            addButton.Last().Click();
-            Task.Delay(100).Wait();
-        }
-
-        private void EnterLocalhostAddress()
-        {
-            var t = window.FindAllDescendants(c => c.ByControlType(ControlType.Edit))
-                .First(v => v.AsTextBox().Text.Contains("localhost"));
-            t.Focus();
-            t.AsTextBox().Text = $"http://localhost:{HttpApiPort}";
-            window.FindAllDescendants(c => c.ByName("Ok")).Last().AsButton().Click();
-        }
-
-        private AutomationElement[] WaitForNodesCheckboxes()
-        {
-            AutomationElement[] checkboxes = null;
-            for (int i = 0;
-                i < 10
-                && (checkboxes = window.FindAllDescendants(c => c.ByControlType(ControlType.CheckBox))).Length == 0;
-                i++)
-                Task.Delay(1000).Wait();
-            return checkboxes;
-        }
-
-        private void SelectAllNodes(AutomationElement[] Checkboxes)
-        {
-            foreach (var cb in Checkboxes)
-                cb.AsCheckBox().IsChecked = true;
-        }
-
-        private void AcceptSettings()
-        {
-            window.FindAllDescendants(c => c.ByName("Ok")).Last().AsButton().Click();
-        }
+        private Application application;
     }
 }
