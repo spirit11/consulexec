@@ -31,20 +31,20 @@ namespace ConsulExec.Tests.Infrastructure
 
             Expect(loadedTarget.MruCommands, EqualTo(savedTarget.MruCommands),
                 "Recent commands are not saved or loaded");
-            Expect(loadedTarget.Connections, PropConstraint.Create(savedTarget.Connections, v => v.Name),
+            Expect(loadedTarget.Connections, CollectionProperties.AreEqual(savedTarget.Connections, v => v.Name),
                 "Connection names are not saved or loaded");
-            Expect(loadedTarget.Connections, PropConstraint.Create(savedTarget.Connections, v => v.ServerAddress),
+            Expect(loadedTarget.Connections, CollectionProperties.AreEqual(savedTarget.Connections, v => v.ServerAddress),
                 "Connection addreses are not saved or loaded");
 
             Expect(loadedTarget.Starup.Select(v => v.Connection).Distinct(), SubsetOf(loadedTarget.Connections),
                 "Connections of startup properties are not from Connections collection");
 
-            Expect(loadedTarget.Starup, PropConstraint.Create(savedTarget.Starup, v => v.Connection.Name),
+            Expect(loadedTarget.Starup, CollectionProperties.AreEqual(savedTarget.Starup, v => v.Connection.Name),
                 "Starup connections are not properly mapped");
 
-            Expect(loadedTarget.Starup, PropConstraint.Create(savedTarget.Starup, v => v.Name),
+            Expect(loadedTarget.Starup, CollectionProperties.AreEqual(savedTarget.Starup, v => v.Name),
                 "Starup names are not saved or loaded");
-            Expect(loadedTarget.Starup, PropConstraint.Create(savedTarget.Starup, v => string.Join(", ", v.Nodes)),
+            Expect(loadedTarget.Starup, CollectionProperties.AreEqual(savedTarget.Starup, v => string.Join(", ", v.Nodes)),
                 "Starup nodes are not saved or loaded");
         }
 

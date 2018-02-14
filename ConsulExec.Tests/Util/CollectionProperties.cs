@@ -6,10 +6,10 @@ using NUnit.Framework.Constraints;
 
 namespace ConsulExec.Tests.Util
 {
-    public class PropConstraint
+    public class CollectionProperties
     {
-        public static Constraint Create<TI, TO>(IEnumerable<TI> Tt, Func<TI, TO> TTo) =>
-            new PropConstraint<TI, TO>(Tt, TTo);
+        public static Constraint AreEqual<TI, TO>(IEnumerable<TI> Sequence, Func<TI, TO> PropertySelector) =>
+            new PropConstraint<TI, TO>(Sequence, PropertySelector);
     }
 
 
@@ -54,19 +54,18 @@ namespace ConsulExec.Tests.Util
             var seq1 = new[] { 1, 2, 3 }.Select(v => new TestClass { Prop = v }).ToArray();
             var seq2 = new[] { 1, 2, 3 }.Select(v => new TestClass { Prop = v }).ToArray();
             var seq3 = new[] { 1, 2, 4 }.Select(v => new TestClass { Prop = v }).ToArray();
-            var cons = PropConstraint.Create(seq1, v => v.Prop);
+            var cons = CollectionProperties.AreEqual(seq1, v => v.Prop);
             Expect(cons.ApplyTo(seq2).IsSuccess, True);
             Expect(cons.ApplyTo(seq3).IsSuccess, False);
         }
 
         [Test]
-        [Ignore("Should fail!")]
         public void CorrectApplyToEvaluation2()
         {
             var seq1 = new[] { 1, 2, 3 }.Select(v => new TestClass { Prop = v }).ToArray();
             var seq3 = new[] { 1, 2, 4 }.Select(v => new TestClass { Prop = v }).ToArray();
-            var cons = PropConstraint.Create(seq1, v => v.Prop);
-            Expect(seq3, cons);
+            var cons = CollectionProperties.AreEqual(seq1, v => v.Prop);
+            Expect(() => Expect(seq3, cons), Throws.Exception);
         }
     }
 }
