@@ -17,8 +17,8 @@ namespace ConsulExec
             ForConcreteType<ReactiveList<ProfileViewModel<ConnectionOptions>>>().Configure.Singleton();
 
             For<ConnectionOptionsFactoryDelegate>()
-                //.Use(new ConnectionOptionsFactoryDelegate(Name => new ConnectionOptions { Name = Name }));
-                .Use(new ConnectionOptionsFactoryDelegate(Name => new FakeConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500"}));
+                .Use(new ConnectionOptionsFactoryDelegate(Name => new ConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500" }));
+                //.Use(new ConnectionOptionsFactoryDelegate(Name => new FakeConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500"}));
             For<IEditorsFabric>().Use<EditorsFabric>();
 
             For<StartupOptionsFabricDelegate>()
