@@ -4,15 +4,15 @@ using ReactiveUI;
 
 namespace ConsulExec.ViewModel
 {
-    public interface IEditorsFabric
+    public interface IEditorsFactory
     {
         void EditStartupOptions(ProfileViewModel<StartupOptions> Profile, Action<IProfileEditorViewModel<ProfileViewModel<StartupOptions>>> EditorSetup);
         void EditConnectionOptions(ProfileViewModel<ConnectionOptions> Profile, Action<IProfileEditorViewModel<ProfileViewModel<ConnectionOptions>>> EditorSetup);
     }
 
-    public class EditorsFabric : IEditorsFabric
+    public class EditorsFactory : IEditorsFactory
     {
-        public EditorsFabric(IActivatingViewModel ActivatingViewModel,
+        public EditorsFactory(IActivatingViewModel ActivatingViewModel,
             ReactiveList<ProfileViewModel<ConnectionOptions>> ConnectionsList,
             UndoListViewModel UndoList,
             ConnectionOptionsFactoryDelegate ConnectionConnectionOptionsFabric)

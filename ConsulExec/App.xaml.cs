@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
+using ConsulExec.Domain;
 using ReactiveUI;
 using Splat;
 using ConsulExec.Infrastructure;
@@ -16,7 +18,7 @@ namespace ConsulExec
         {
             base.OnStartup(E);
 
-            var container = new Container(new RuntimeRegistry());
+            container = new Container(new RuntimeRegistry());
 
             var dependencyResolver = new StructureMapToSplatLocatorAdapter(container, Locator.Current);
             Locator.Current = dependencyResolver;
@@ -25,12 +27,31 @@ namespace ConsulExec
 
             container.Configure(x => x.For<IViewLocator>().ClearAll().Use<ConventionalViewLocator>().Singleton());
 
+            container.Configure(x => x.For<Configuration>().Use(LoadConfiguration()));
+
             this.Log().Info("Started");
+
             var mainWindowViewModel = container.GetInstance<MainWindowViewModel>();
             mainWindowViewModel.Activate(container.GetInstance<CommandStartupViewModel>());
 
             MainWindow = new MainWindow { DataContext = mainWindowViewModel };
+
             MainWindow.Show();
         }
+
+        private static Configuration LoadConfiguration()
+        {
+            return new Configuration();
+            //Configuration.ReadFrom()
+        }
+
+        protected override void OnExit(ExitEventArgs E)
+        {
+            container.GetInstance<Configuration>().SaveTo(new StringWriter());
+            container?.Dispose();
+            base.OnExit(E);
+        }
+
+        private Container container;
     }
 }

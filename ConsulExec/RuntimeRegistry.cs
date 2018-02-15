@@ -10,24 +10,28 @@ namespace ConsulExec
 {
     internal class RuntimeRegistry : Registry
     {
-        public RuntimeRegistry()
+        public RuntimeRegistry(bool FakeConnection = false)
         {
             Policies.OnMissingFamily(new DefaultInterfaceImplementationPolicy());
 
-            ForConcreteType<ReactiveList<ProfileViewModel<ConnectionOptions>>>().Configure.Singleton();
+            For<ReactiveList<ProfileViewModel<ConnectionOptions>>>().
+                Use(new ReactiveList<ProfileViewModel<ConnectionOptions>>()); //cfg
 
-            For<ConnectionOptionsFactoryDelegate>()
-                .Use(new ConnectionOptionsFactoryDelegate(Name => new ConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500" }));
-                //.Use(new ConnectionOptionsFactoryDelegate(Name => new FakeConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500"}));
-            For<IEditorsFabric>().Use<EditorsFabric>();
+            var сonnectionOptionsFactoryDelegate = FakeConnection
+                ? Name => new FakeConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500" }
+                : new ConnectionOptionsFactoryDelegate(Name => new ConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500" });
 
-            For<StartupOptionsFabricDelegate>()
-                .Use(new StartupOptionsFabricDelegate(Name => new SequentialStartupOptions(Array.Empty<string>()) { Name = Name }));
+            For<ConnectionOptionsFactoryDelegate>().Use(сonnectionOptionsFactoryDelegate);
+
+            For<IEditorsFactory>().Use<EditorsFactory>();
+
+            For<StartupOptionsFactoryDelegate>()
+                .Use(new StartupOptionsFactoryDelegate(Name => new SequentialStartupOptions(Array.Empty<string>()) { Name = Name }));
 
             ForConcreteType<ConnectionProfilesViewModel>()
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<ConnectionOptions>>.EditProfileDelegate>()
-                .Is(ctxt => ctxt.GetInstance<IEditorsFabric>().EditConnectionOptions);
+                .Is(ctxt => ctxt.GetInstance<IEditorsFactory>().EditConnectionOptions);
 
             ForConcreteType<MainWindowViewModel>().Configure.Singleton();
 
@@ -37,18 +41,17 @@ namespace ConsulExec
             ForConcreteType<StartupOptionsProfilesViewModel>()
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate>()
-                .Is(ctxt => ctxt.GetInstance<IEditorsFabric>().EditStartupOptions)
+                .Is(ctxt => ctxt.GetInstance<IEditorsFactory>().EditStartupOptions)
                 .Ctor<ReactiveList<ProfileViewModel<StartupOptions>>>()
-                .Is(new ReactiveList<ProfileViewModel<StartupOptions>>());
+                .Is(new ReactiveList<ProfileViewModel<StartupOptions>>()); //cfg
 
-            For<Action<StartupOptions, string>>()
-                .Use(ctxt => StartCommand(ctxt))
-                .Named("executeCommandHandler");
+            var executeCommandHandler = For<Action<StartupOptions, string>>()
+                .Use(ctxt => StartCommand(ctxt));
 
-            ForConcreteType<CommandStartupViewModel>()
+            ForConcreteType<CommandStartupViewModel>() //cfg
                 .Configure
                 .Ctor<Action<StartupOptions, string>>()
-                .IsNamedInstance("executeCommandHandler")
+                .Is(executeCommandHandler)
                 .OnCreation((context, Model) => FillTestData(context, Model));
         }
 
@@ -74,24 +77,24 @@ namespace ConsulExec
                 "ping ya.ru"
             });
 
-            var fabric = Context.GetInstance<ConnectionOptionsFactoryDelegate>();
+            var factury = Context.GetInstance<ConnectionOptionsFactoryDelegate>();
 
-            var connectionOptions = ConstructConnectionOptions("serv2", "http://192.168.1.101:8500", fabric);
+            var connectionOptions = ConstructConnectionOptions("node01", "http://192.168.1.101:8500", factury);
 
             CommandStartupViewModel.ConnectionProfiles.List.Add(
-                ProfileViewModelsFabric.Create(ConstructConnectionOptions("serv1", "http://serv1", fabric)));
-            CommandStartupViewModel.ConnectionProfiles.List.Add(ProfileViewModelsFabric.Create(connectionOptions));
+                ProfileViewModelsFactory.Create(ConstructConnectionOptions("unexisting server", "http://serv1", factury)));
+            CommandStartupViewModel.ConnectionProfiles.List.Add(ProfileViewModelsFactory.Create(connectionOptions));
 
             CommandStartupViewModel.StartupOptionsProfiles.List.Add(
-                ProfileViewModelsFabric.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt", Connection = connectionOptions }));
+                ProfileViewModelsFactory.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt", Connection = connectionOptions }));
             CommandStartupViewModel.StartupOptionsProfiles.Profile = CommandStartupViewModel.StartupOptionsProfiles.List[0];
         }
 
         private static ConnectionOptions ConstructConnectionOptions(string Name,
             string ServerAddress,
-            ConnectionOptionsFactoryDelegate Fabric)
+            ConnectionOptionsFactoryDelegate Factory)
         {
-            var result = Fabric(Name);
+            var result = Factory(Name);
             result.ServerAddress = ServerAddress;
             return result;
         }

@@ -26,7 +26,7 @@ namespace ConsulExec.Tests.ViewModel
         protected void CreateTarget(IObservable<string[]> Nodes, string[] InitialNodes)
         {
             var co = GetConnectionOptionsReturningNodes(Nodes);
-            CreateTarget(InitialNodes, co, new[] { ProfileViewModelsFabric.Create(co) });
+            CreateTarget(InitialNodes, co, new[] { ProfileViewModelsFactory.Create(co) });
         }
 
         protected void CreateTarget(string[][] NodeNamesForConnection, string[] InitialNodes)
@@ -45,7 +45,7 @@ namespace ConsulExec.Tests.ViewModel
             var connections = new ConnectionProfilesViewModel((o, e) => { },
                 new UndoListViewModel(),
                 new ReactiveList<ProfileViewModel<ConnectionOptions>>(ProfileViewModels));
-            StartupOptionsProfileViewModel = ProfileViewModelsFabric.Create(
+            StartupOptionsProfileViewModel = ProfileViewModelsFactory.Create(
                 new SequentialStartupOptions(InitialNodes) { Connection = co, Name = OldName });
             Target = new StartupOptionsEditorViewModel(
                 StartupOptionsProfileViewModel,

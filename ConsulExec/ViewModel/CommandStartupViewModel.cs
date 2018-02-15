@@ -20,6 +20,10 @@ namespace ConsulExec.ViewModel
                 var cmd = Command;
                 recentCommands.Remove(cmd);
                 recentCommands.Add(cmd);
+
+                if (recentCommands.Count > MaxRecentCommands)
+                    recentCommands.RemoveRange(0, recentCommands.Count - MaxRecentCommands);
+
                 Command = cmd;
                 RunCommand?.Invoke(StartupOptionsProfiles.Profile.Options, cmd);
             }, this.WhenAnyValue(v => v.Command, v => v.StartupOptionsProfiles.Profile, (cmd, opt) => !string.IsNullOrWhiteSpace(cmd) && opt != null));
@@ -50,5 +54,7 @@ namespace ConsulExec.ViewModel
         public ICommand UndoCommand => StartupOptionsProfiles.UndoCommand;
 
         #endregion
+
+        private const int MaxRecentCommands = 20;
     }
 }

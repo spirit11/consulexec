@@ -6,7 +6,7 @@ namespace ConsulExec.ViewModel
     using StartupOptionsViewModel = ProfileViewModel<StartupOptions>;
 
 
-    public delegate StartupOptions StartupOptionsFabricDelegate(string Name);
+    public delegate StartupOptions StartupOptionsFactoryDelegate(string Name);
 
 
     public class StartupOptionsProfilesViewModel : ProfilesViewModel<StartupOptionsViewModel>
@@ -15,17 +15,17 @@ namespace ConsulExec.ViewModel
             UndoListViewModel UndoList,
             ConnectionProfilesViewModel ConnectionProfiles,
             ReactiveList<StartupOptionsViewModel> StartupProfiles,
-            StartupOptionsFabricDelegate StartupOptionsFabric = null)
+            StartupOptionsFactoryDelegate StartupOptionsFactory = null)
             : base(EditProfile, UndoList, StartupProfiles)
         {
             this.ConnectionProfiles = ConnectionProfiles;
-            startupOptionsFabric = StartupOptionsFabric ?? DefaultOptionsFabric;
+            startupOptionsFactory = StartupOptionsFactory ?? DefaultOptionsFabric;
         }
 
         public ConnectionProfilesViewModel ConnectionProfiles { get; }
 
         protected override StartupOptionsViewModel CreateProfile(string NewName) =>
-            ProfileViewModelsFabric.Create(startupOptionsFabric(NewName));
+            ProfileViewModelsFactory.Create(startupOptionsFactory(NewName));
 
         protected override void Restore(StartupOptionsViewModel EditStartupOptionsProfile, object O) =>
             EditStartupOptionsProfile.Options = (SequentialStartupOptions)O;
@@ -38,6 +38,6 @@ namespace ConsulExec.ViewModel
             return new SequentialStartupOptions(new string[0]) { Name = NewName };
         }
 
-        private readonly StartupOptionsFabricDelegate startupOptionsFabric;
+        private readonly StartupOptionsFactoryDelegate startupOptionsFactory;
     }
 }

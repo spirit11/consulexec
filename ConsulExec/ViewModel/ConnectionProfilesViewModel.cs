@@ -1,4 +1,6 @@
-﻿using ConsulExec.Domain;
+﻿using System.Collections.Generic;
+using System.Linq;
+using ConsulExec.Domain;
 using ReactiveUI;
 
 namespace ConsulExec.ViewModel
@@ -11,7 +13,7 @@ namespace ConsulExec.ViewModel
 
     public class ConnectionProfilesViewModel : ProfilesViewModel<ConnectionOptionsViewModel>
     {
-        public ConnectionProfilesViewModel(EditProfileDelegate EditProfile, 
+        public ConnectionProfilesViewModel(EditProfileDelegate EditProfile,
             UndoListViewModel UndoList,
             ReactiveList<ConnectionOptionsViewModel> Profiles,
             ConnectionOptionsFactoryDelegate ConnectionOptionsFactory = null)
@@ -21,7 +23,7 @@ namespace ConsulExec.ViewModel
         }
 
         protected override ConnectionOptionsViewModel CreateProfile(string NewName) =>
-            ProfileViewModelsFabric.Create(connectionOptionsFactory(NewName));
+            ProfileViewModelsFactory.Create(connectionOptionsFactory(NewName));
 
         protected override void Restore(ConnectionOptionsViewModel EditStartupOptionsProfile, object O) =>
             EditStartupOptionsProfile.Options = (ConnectionOptions)O;
