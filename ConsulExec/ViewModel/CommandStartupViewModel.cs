@@ -1,6 +1,7 @@
 ﻿using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 using ConsulExec.Domain;
 
@@ -11,33 +12,44 @@ namespace ConsulExec.ViewModel
         public CommandStartupViewModel(ConnectionProfilesViewModel ConnectionProfilesViewModel,
             StartupOptionsProfilesViewModel StartupOptionsProfilesViewModel,
             Action<StartupOptions, string> RunCommand,
-            ReactiveList<string> RecentCommands = null)
+            ReactiveList<CommandViewModel> RecentCommands = null)
         {
             ConnectionProfiles = ConnectionProfilesViewModel;
-            recentCommands = RecentCommands ?? new ReactiveList<string>();
+            recentCommands = RecentCommands ?? new ReactiveList<CommandViewModel>();
             StartupOptionsProfiles = StartupOptionsProfilesViewModel;
 
             ExecuteCommand = ReactiveCommand.Create(() =>
             {
-                var cmd = Command;
+                var cmd = command;
                 recentCommands.Remove(cmd);
                 recentCommands.Add(cmd);
 
                 if (recentCommands.Count > MaxRecentCommands)
                     recentCommands.RemoveRange(0, recentCommands.Count - MaxRecentCommands);
 
-                Command = cmd;
-                RunCommand?.Invoke(StartupOptionsProfiles.Profile.Options, cmd);
+                Command = command.Command;
+                RunCommand?.Invoke(StartupOptionsProfiles.Profile.Options, cmd.Command);
             }, this.WhenAnyValue(v => v.Command, v => v.StartupOptionsProfiles.Profile, (cmd, opt) => !string.IsNullOrWhiteSpace(cmd) && opt != null));
 
             SetCommandCommand = ReactiveCommand.Create<string>(s => Command = s);
         }
 
-        public string Command { get { return command; } set { this.RaiseAndSetIfChanged(ref command, value); } } //TODO perhaps CommandViewModel
-        private string command;
+        public string Command
+        {
+            get
+            {
+                return command.Command;
+            }
+            set
+            {
+                var vm = recentCommands.FirstOrDefault(c => c.Command == value) ?? new CommandViewModel { Command = value };
+                this.RaiseAndSetIfChanged(ref command, vm);
+            }
+        }
+        private CommandViewModel command = CommandViewModel.Empty;
 
-        public IReactiveDerivedList<string> RecentCommands => recentCommands.CreateDerivedCollection(v => v);
-        private readonly ReactiveList<string> recentCommands;
+        public IReactiveDerivedList<string> RecentCommands => recentCommands.CreateDerivedCollection(v => v.Command);
+        private readonly ReactiveList<CommandViewModel> recentCommands;
 
         public ConnectionProfilesViewModel ConnectionProfiles { get; }
 
@@ -45,7 +57,7 @@ namespace ConsulExec.ViewModel
 
         public void ClearRecentCommands() => recentCommands.Clear();
 
-        public void AddRecentCommands(IEnumerable<string> Cmds) => recentCommands.AddRange(Cmds);
+        public void AddRecentCommands(IEnumerable<string> Cmds) => recentCommands.AddRange(Cmds.Select(c => new CommandViewModel { Command = c }));
 
         #region Commands
 

@@ -137,6 +137,7 @@
     <Compile Include="ViewModel\BaseOptionsEditorViewModel.cs" />
     <Compile Include="ViewModel\CommandRunViewModel.cs" />
     <Compile Include="ViewModel\CommandStartupViewModel.cs" />
+    <Compile Include="ViewModel\CommandViewModel.cs" />
     <Compile Include="ViewModel\ConnectionOptionsEditorViewModel.cs" />
     <Compile Include="ViewModel\ConnectionProfilesViewModel.cs" />
     <Compile Include="ViewModel\EditorsFabric.cs" />
