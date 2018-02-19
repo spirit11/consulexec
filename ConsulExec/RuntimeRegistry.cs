@@ -28,11 +28,6 @@ namespace ConsulExec
                 .Use(new ReactiveList<ProfileViewModel<StartupOptions>>())
                 .OnCreation((ctxt, list) => BindCollections(ctxt, list));
 
-            var mruCommands = new ReactiveList<string>();
-            //mruCommands.BindTo(configuration.MruCommands,
-            //    v => v,
-            //    v => v);
-
             var сonnectionOptionsFactoryDelegate = FakeConnection
                 ? Name => new FakeConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500" }
                 : new ConnectionOptionsFactoryDelegate(Name => new ConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500" });
@@ -57,19 +52,19 @@ namespace ConsulExec
             ForConcreteType<StartupOptionsProfilesViewModel>()
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate>()
-                .Is(ctxt => ctxt.GetInstance<IEditorsFactory>().EditStartupOptions)
-                .Ctor<ReactiveList<ProfileViewModel<StartupOptions>>>()
-                .Is(ctxt => ctxt.GetInstance<ReactiveList<ProfileViewModel<StartupOptions>>>()); //cfg
+                .Is(ctxt => ctxt.GetInstance<IEditorsFactory>().EditStartupOptions);
 
             var executeCommandHandler = For<Action<StartupOptions, string>>()
                 .Use(ctxt => StartCommand(ctxt));
 
-            ForConcreteType<CommandStartupViewModel>() //cfg
+            For<ReactiveList<CommandViewModel>>()
+                .Use(new ReactiveList<CommandViewModel>())
+                .OnCreation((ctxt, list) => BindCollectionsImpl(ctxt, list));
+
+            ForConcreteType<CommandStartupViewModel>()
                 .Configure
                 .Ctor<Action<StartupOptions, string>>()
                 .Is(executeCommandHandler)
-                .Ctor<ReactiveList<string>>()
-                .Is(mruCommands)
                 .OnCreation((context, Model) => FillTestData(context, Model));
         }
 
@@ -89,6 +84,9 @@ namespace ConsulExec
                 Model => Model.Options);
         }
 
+        private static void BindCollectionsImpl(IContext ctxt, ReactiveList<CommandViewModel> list) =>
+            list.BindTo(ctxt.GetInstance<Configuration>().MruCommands, v => new CommandViewModel(v), v => v.Command);
+
         private static Action<StartupOptions, string> StartCommand(IContext Context) =>
             (options, command) =>
             {
@@ -103,16 +101,15 @@ namespace ConsulExec
         [Conditional("DEBUG")]
         private static void FillTestData(IContext Context, CommandStartupViewModel CommandStartupViewModel)
         {
-            CommandStartupViewModel.Command = "echo ok";
-            CommandStartupViewModel.AddRecentCommands(new[]
-            {
-                "echo ok",
-                "ping ya.ru"
-            });
-
             // don't add test data if some values are loaded from config
             if (!Context.GetInstance<Configuration>().Connections.Any())
             {
+                CommandStartupViewModel.AddRecentCommands(new[]
+                {
+                    "echo ok",
+                    "ping ya.ru"
+                });
+
                 var factory = Context.GetInstance<ConnectionOptionsFactoryDelegate>();
 
                 var connectionOptions = ConstructConnectionOptions("node01", "http://192.168.1.101:8500", factory);
@@ -130,6 +127,8 @@ namespace ConsulExec
                             Connection = connectionOptions
                         }));
             }
+
+            CommandStartupViewModel.Command = CommandStartupViewModel.RecentCommands.LastOrDefault();
 
             CommandStartupViewModel.StartupOptionsProfiles.Profile =
                 CommandStartupViewModel.StartupOptionsProfiles.List.FirstOrDefault(); //Maybe use it as vm feature?

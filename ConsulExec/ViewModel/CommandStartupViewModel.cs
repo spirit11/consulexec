@@ -42,7 +42,7 @@ namespace ConsulExec.ViewModel
             }
             set
             {
-                var vm = recentCommands.FirstOrDefault(c => c.Command == value) ?? new CommandViewModel { Command = value };
+                var vm = recentCommands.FirstOrDefault(c => c.Command == value) ?? new CommandViewModel(value);
                 this.RaiseAndSetIfChanged(ref command, vm);
             }
         }
@@ -57,7 +57,7 @@ namespace ConsulExec.ViewModel
 
         public void ClearRecentCommands() => recentCommands.Clear();
 
-        public void AddRecentCommands(IEnumerable<string> Cmds) => recentCommands.AddRange(Cmds.Select(c => new CommandViewModel { Command = c }));
+        public void AddRecentCommands(IEnumerable<string> Cmds) => recentCommands.AddRange(Cmds.Select(c => new CommandViewModel(c)));
 
         #region Commands
 

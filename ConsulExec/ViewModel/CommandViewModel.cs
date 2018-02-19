@@ -1,8 +1,15 @@
-﻿namespace ConsulExec.ViewModel
+﻿using ReactiveUI;
+
+namespace ConsulExec.ViewModel
 {
-    public class CommandViewModel
+    public class CommandViewModel : ReactiveObject
     {
-        public string Command { get; set; }
-        public static CommandViewModel Empty => new CommandViewModel();
+        public CommandViewModel(string Command)
+        {
+            this.Command = Command;
+        }
+        public string Command { get; }
+
+        public static CommandViewModel Empty => new CommandViewModel("");
     }
 }
