@@ -18,7 +18,7 @@ namespace ConsulExec
         {
             base.OnStartup(E);
 
-            container = new Container(new RuntimeRegistry());
+            container = new Container(new RuntimeRegistry(TryLoadConfiguration()));
 
             var dependencyResolver = new StructureMapToSplatLocatorAdapter(container, Locator.Current);
             Locator.Current = dependencyResolver;
@@ -27,7 +27,7 @@ namespace ConsulExec
 
             container.Configure(x => x.For<IViewLocator>().ClearAll().Use<ConventionalViewLocator>().Singleton());
 
-            container.Configure(x => x.For<Configuration>().Use(LoadConfiguration()));
+            //container.Configure(x => x.For<Configuration>().Use());
 
             this.Log().Info("Started");
 
@@ -39,17 +39,45 @@ namespace ConsulExec
             MainWindow.Show();
         }
 
-        private static Configuration LoadConfiguration()
-        {
-            return new Configuration();
-            //Configuration.ReadFrom()
-        }
-
         protected override void OnExit(ExitEventArgs E)
         {
-            container.GetInstance<Configuration>().SaveTo(new StringWriter());
+            TrySaveConfiguration(container.GetInstance<Configuration>());
+
             container?.Dispose();
             base.OnExit(E);
+        }
+
+        private static string configFilename = "config.json";
+
+        private static Configuration TryLoadConfiguration()
+        {
+            try
+            {
+                if (File.Exists(configFilename))
+                    using (var f = File.OpenText(configFilename))
+                    {
+                        return Configuration.ReadFrom(f);
+                    }
+            }
+            catch (System.Exception)
+            {
+            }
+            return new Configuration();
+        }
+
+        private static void TrySaveConfiguration(Configuration Configuration)
+        {
+            try
+            {
+                using (var f = File.CreateText(configFilename))
+                {
+                    Configuration.SaveTo(f);
+                    f.Close();
+                }
+            }
+            catch (System.Exception)
+            {
+            }
         }
 
         private Container container;

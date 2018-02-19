@@ -1,21 +1,40 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using ConsulExec.Design;
 using ConsulExec.Domain;
+using ConsulExec.Infrastructure;
 using ConsulExec.ViewModel;
 using ReactiveUI;
 using StructureMap;
 
 namespace ConsulExec
 {
-    internal class RuntimeRegistry : Registry
+    public class RuntimeRegistry : Registry
     {
-        public RuntimeRegistry(bool FakeConnection = false)
+        public RuntimeRegistry(Configuration Configuration = null, bool FakeConnection = false)
         {
             Policies.OnMissingFamily(new DefaultInterfaceImplementationPolicy());
 
+            var configuration = Configuration ?? new Configuration();
+            For<Configuration>().Use(configuration);
+
+            var connections = new ReactiveList<ProfileViewModel<ConnectionOptions>>();
+            connections.BindTo(configuration.Connections,
+                ProfileViewModelsFactory.Create,
+                Model => Model.Options);
             For<ReactiveList<ProfileViewModel<ConnectionOptions>>>().
-                Use(new ReactiveList<ProfileViewModel<ConnectionOptions>>()); //cfg
+                Use(connections); //cfg
+
+            var startups = new ReactiveList<ProfileViewModel<StartupOptions>>();
+            startups.BindTo(configuration.Starup,
+                ProfileViewModelsFactory.Create,
+                Model => Model.Options);
+
+            var mruCommands = new ReactiveList<string>();
+            //mruCommands.BindTo(configuration.MruCommands,
+            //    v => v,
+            //    v => v);
 
             var сonnectionOptionsFactoryDelegate = FakeConnection
                 ? Name => new FakeConnectionOptions { Name = Name, ServerAddress = "http://localhost:8500" }
@@ -43,7 +62,7 @@ namespace ConsulExec
                 .Ctor<ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate>()
                 .Is(ctxt => ctxt.GetInstance<IEditorsFactory>().EditStartupOptions)
                 .Ctor<ReactiveList<ProfileViewModel<StartupOptions>>>()
-                .Is(new ReactiveList<ProfileViewModel<StartupOptions>>()); //cfg
+                .Is(startups); //cfg
 
             var executeCommandHandler = For<Action<StartupOptions, string>>()
                 .Use(ctxt => StartCommand(ctxt));
@@ -52,6 +71,8 @@ namespace ConsulExec
                 .Configure
                 .Ctor<Action<StartupOptions, string>>()
                 .Is(executeCommandHandler)
+                .Ctor<ReactiveList<string>>()
+                .Is(mruCommands)
                 .OnCreation((context, Model) => FillTestData(context, Model));
         }
 
@@ -77,12 +98,16 @@ namespace ConsulExec
                 "ping ya.ru"
             });
 
-            var factury = Context.GetInstance<ConnectionOptionsFactoryDelegate>();
+            // don't add test data if some values are loaded from config
+            if (Context.GetInstance<Configuration>().Connections.Any())
+                return;
 
-            var connectionOptions = ConstructConnectionOptions("node01", "http://192.168.1.101:8500", factury);
+            var factory = Context.GetInstance<ConnectionOptionsFactoryDelegate>();
+
+            var connectionOptions = ConstructConnectionOptions("node01", "http://192.168.1.101:8500", factory);
 
             CommandStartupViewModel.ConnectionProfiles.List.Add(
-                ProfileViewModelsFactory.Create(ConstructConnectionOptions("unexisting server", "http://serv1", factury)));
+                ProfileViewModelsFactory.Create(ConstructConnectionOptions("unexisting server", "http://serv1", factory)));
             CommandStartupViewModel.ConnectionProfiles.List.Add(ProfileViewModelsFactory.Create(connectionOptions));
 
             CommandStartupViewModel.StartupOptionsProfiles.List.Add(

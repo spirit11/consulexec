@@ -5,20 +5,35 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
+using ReactiveUI;
 
 namespace ConsulExec.Infrastructure
 {
-    public class CollectionSyncronizer
+    public static class CollectionSyncronizer
     {
-        public static CollectionSyncronizer<TM, TVM, ObservableCollection<TVM>> Bind<TM, TVM>(
-            ObservableCollection<TVM> ViewModelCollection,
+        public static CollectionSyncronizer<TM, TVM, ObservableCollection<TVM>> BindTo<TM, TVM>(
+            this ObservableCollection<TVM> ViewModelCollection,
             IList<TM> ModelCollection,
             Func<TM, TVM> ViewModelFactory,
             Expression<Func<TVM, TM>> ModelProperty)
-            where TVM : INotifyPropertyChanged
-        {
-            return new CollectionSyncronizer<TM, TVM, ObservableCollection<TVM>>(ViewModelCollection, ModelCollection, ViewModelFactory, ModelProperty);
-        }
+            where TVM : INotifyPropertyChanged => 
+            new CollectionSyncronizer<TM, TVM, ObservableCollection<TVM>>(
+                ViewModelCollection, 
+                ModelCollection, 
+                ViewModelFactory, 
+                ModelProperty);
+
+        public static CollectionSyncronizer<TM, TVM, ReactiveList<TVM>> BindTo<TM, TVM>(
+            this ReactiveList<TVM> ViewModelCollection,
+            IList<TM> ModelCollection,
+            Func<TM, TVM> ViewModelFactory,
+            Expression<Func<TVM, TM>> ModelProperty)
+            where TVM : INotifyPropertyChanged => 
+            new CollectionSyncronizer<TM, TVM, ReactiveList<TVM>>(
+                ViewModelCollection,
+                ModelCollection, 
+                ViewModelFactory, 
+                ModelProperty);
     }
 
 

@@ -10,9 +10,11 @@ namespace ConsulExec.ViewModel
     {
         public CommandStartupViewModel(ConnectionProfilesViewModel ConnectionProfilesViewModel,
             StartupOptionsProfilesViewModel StartupOptionsProfilesViewModel,
-            Action<StartupOptions, string> RunCommand)
+            Action<StartupOptions, string> RunCommand,
+            ReactiveList<string> RecentCommands = null)
         {
             ConnectionProfiles = ConnectionProfilesViewModel;
+            recentCommands = RecentCommands ?? new ReactiveList<string>();
             StartupOptionsProfiles = StartupOptionsProfilesViewModel;
 
             ExecuteCommand = ReactiveCommand.Create(() =>
@@ -35,7 +37,7 @@ namespace ConsulExec.ViewModel
         private string command;
 
         public IReactiveDerivedList<string> RecentCommands => recentCommands.CreateDerivedCollection(v => v);
-        private readonly ReactiveList<string> recentCommands = new ReactiveList<string>();
+        private readonly ReactiveList<string> recentCommands;
 
         public ConnectionProfilesViewModel ConnectionProfiles { get; }
 

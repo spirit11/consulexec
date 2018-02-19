@@ -37,9 +37,7 @@ namespace ConsulExec.Tests.Infrastructure
                 Expect(AssertCollectionsInSync, Throws.Exception.TypeOf<AssertionException>());
             }
 
-            CollectionSyncronizer.Bind(
-                viewModels,
-                models,
+            viewModels.BindTo(models,
                 m => new ViewModel(m),
                 vm => vm.Model);
         }

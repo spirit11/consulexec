@@ -17,14 +17,14 @@ namespace ConsulExec.Tests.Infrastructure
             var connections = new[] { co, co2 };
             var savedTarget = new Configuration
             {
-                Connections = connections,
-                MruCommands = new[] { "cmd1", "cmd2" },
-                Starup = new[]
+                Connections = connections.ToList(),
+                MruCommands = new[] { "cmd1", "cmd2" }.ToList(),
+                Starup = new StartupOptions[]
                 {
                     new SequentialStartupOptions(new[] { "a", "b" }) { Connection = connections.First() },
                     new SequentialStartupOptions(new[] { "c", "d" }) { Connection = connections.First() },
                     new SequentialStartupOptions(new[] { "e" }) { Connection = connections.Last() },
-                }
+                }.ToList()
             };
 
             var loadedTarget = SaveAndLoadTarget(savedTarget);

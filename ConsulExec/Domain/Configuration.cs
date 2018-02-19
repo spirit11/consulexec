@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using Newtonsoft.Json;
 
 namespace ConsulExec.Domain
@@ -10,9 +12,9 @@ namespace ConsulExec.Domain
             return JsonConvert.DeserializeObject<Configuration>(Reader.ReadToEnd(), JsonSettings);
         }
 
-        public string[] MruCommands;
-        public ConnectionOptions[] Connections;
-        public StartupOptions[] Starup;
+        public List<string> MruCommands = new List<string>();
+        public List<ConnectionOptions> Connections = new List<ConnectionOptions>();
+        public List<StartupOptions> Starup = new List<StartupOptions>();
 
         public void SaveTo(TextWriter Writer)
         {

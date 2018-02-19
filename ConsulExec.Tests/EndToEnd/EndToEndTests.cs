@@ -43,7 +43,7 @@ namespace ConsulExec.Tests.EndToEnd
 
                 var checkboxes = application.WaitForNodesCheckboxes();
 
-                Expect(() => checkboxes = application.WaitForNodesCheckboxes(), 
+                Expect(() => checkboxes = application.WaitForNodesCheckboxes(),
                     Length.GreaterThan(0).After(3000).PollEvery(100),
                     "No checkboxes for nodes are found");
 
@@ -55,7 +55,7 @@ namespace ConsulExec.Tests.EndToEnd
 
                 application.ClickExecute();
 
-                Expect(() => application.GetAllTextBoxesText(), 
+                Expect(() => application.GetAllTextBoxesText(),
                     Some.Contains("Completed").And.Some.Contains(EchoString).After(3000).PollEvery(100),
                     "No results are repoted in UI");
 
