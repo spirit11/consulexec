@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 
-
-namespace ConsulExec.Tests
+namespace ConsulExec.Tests.Infrastructure
 {
     [TestFixture]
     public class TestClassTemplate : AssertionHelper

@@ -119,6 +119,7 @@
     <Compile Include="Design\FakeTaskRun.cs" />
     <Compile Include="Domain\Configuration.cs" />
     <Compile Include="Domain\ConnectionOptions.cs" />
+    <Compile Include="Infrastructure\CollectionSyncronizer.cs" />
     <Compile Include="Infrastructure\ConventionalViewLocator.cs" />
     <Compile Include="Design\FakeRemoteExecution.cs" />
     <Compile Include="Domain\RemoteExecution.cs" />
