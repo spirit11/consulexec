@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using ConsulExec.Design;
@@ -12,24 +13,20 @@ namespace ConsulExec
 {
     public class RuntimeRegistry : Registry
     {
-        public RuntimeRegistry(Configuration Configuration = null, bool FakeConnection = false)
+        public RuntimeRegistry(bool FakeConnection = false)
         {
             Policies.OnMissingFamily(new DefaultInterfaceImplementationPolicy());
 
-            var configuration = Configuration ?? new Configuration();
+            var configuration = new Configuration();
             For<Configuration>().Use(configuration);
 
-            var connections = new ReactiveList<ProfileViewModel<ConnectionOptions>>();
-            connections.BindTo(configuration.Connections,
-                ProfileViewModelsFactory.Create,
-                Model => Model.Options);
-            For<ReactiveList<ProfileViewModel<ConnectionOptions>>>().
-                Use(connections); //cfg
+            For<ReactiveList<ProfileViewModel<ConnectionOptions>>>()
+                .Use(new ReactiveList<ProfileViewModel<ConnectionOptions>>())
+                .OnCreation((ctxt, list) => BindCollections(ctxt, list));
 
-            var startups = new ReactiveList<ProfileViewModel<StartupOptions>>();
-            startups.BindTo(configuration.Starup,
-                ProfileViewModelsFactory.Create,
-                Model => Model.Options);
+            For<ReactiveList<ProfileViewModel<StartupOptions>>>()
+                .Use(new ReactiveList<ProfileViewModel<StartupOptions>>())
+                .OnCreation((ctxt, list) => BindCollections(ctxt, list));
 
             var mruCommands = new ReactiveList<string>();
             //mruCommands.BindTo(configuration.MruCommands,
@@ -62,7 +59,7 @@ namespace ConsulExec
                 .Ctor<ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate>()
                 .Is(ctxt => ctxt.GetInstance<IEditorsFactory>().EditStartupOptions)
                 .Ctor<ReactiveList<ProfileViewModel<StartupOptions>>>()
-                .Is(startups); //cfg
+                .Is(ctxt => ctxt.GetInstance<ReactiveList<ProfileViewModel<StartupOptions>>>()); //cfg
 
             var executeCommandHandler = For<Action<StartupOptions, string>>()
                 .Use(ctxt => StartCommand(ctxt));
@@ -76,6 +73,21 @@ namespace ConsulExec
                 .OnCreation((context, Model) => FillTestData(context, Model));
         }
 
+        private static void BindCollections(IContext Ctxt, ReactiveList<ProfileViewModel<StartupOptions>> List) =>
+            BindCollectionsImpl(Ctxt, List, ProfileViewModelsFactory.Create, c => c.Starup);
+
+        private static void BindCollections(IContext Ctxt, ReactiveList<ProfileViewModel<ConnectionOptions>> List) =>
+            BindCollectionsImpl(Ctxt, List, ProfileViewModelsFactory.Create, c => c.Connections);
+
+        private static void BindCollectionsImpl<T>(IContext Ctxt,
+            ReactiveList<ProfileViewModel<T>> List,
+            Func<T, ProfileViewModel<T>> ViewModelFactory,
+            Func<Configuration, IList<T>> ConfigurationProperty)
+        {
+            List.BindTo(ConfigurationProperty(Ctxt.GetInstance<Configuration>()),
+                ViewModelFactory,
+                Model => Model.Options);
+        }
 
         private static Action<StartupOptions, string> StartCommand(IContext Context) =>
             (options, command) =>
@@ -99,20 +111,28 @@ namespace ConsulExec
             });
 
             // don't add test data if some values are loaded from config
-            if (Context.GetInstance<Configuration>().Connections.Any())
-                return;
+            if (!Context.GetInstance<Configuration>().Connections.Any())
+            {
+                var factory = Context.GetInstance<ConnectionOptionsFactoryDelegate>();
 
-            var factory = Context.GetInstance<ConnectionOptionsFactoryDelegate>();
+                var connectionOptions = ConstructConnectionOptions("node01", "http://192.168.1.101:8500", factory);
 
-            var connectionOptions = ConstructConnectionOptions("node01", "http://192.168.1.101:8500", factory);
+                CommandStartupViewModel.ConnectionProfiles.List.Add(
+                    ProfileViewModelsFactory.Create(ConstructConnectionOptions("unexisting server", "http://serv1",
+                        factory)));
+                CommandStartupViewModel.ConnectionProfiles.List.Add(ProfileViewModelsFactory.Create(connectionOptions));
 
-            CommandStartupViewModel.ConnectionProfiles.List.Add(
-                ProfileViewModelsFactory.Create(ConstructConnectionOptions("unexisting server", "http://serv1", factory)));
-            CommandStartupViewModel.ConnectionProfiles.List.Add(ProfileViewModelsFactory.Create(connectionOptions));
+                CommandStartupViewModel.StartupOptionsProfiles.List.Add(
+                    ProfileViewModelsFactory.Create(
+                        new SequentialStartupOptions(new[] { "Val-Pc2" })
+                        {
+                            Name = "opt",
+                            Connection = connectionOptions
+                        }));
+            }
 
-            CommandStartupViewModel.StartupOptionsProfiles.List.Add(
-                ProfileViewModelsFactory.Create(new SequentialStartupOptions(new[] { "Val-Pc2" }) { Name = "opt", Connection = connectionOptions }));
-            CommandStartupViewModel.StartupOptionsProfiles.Profile = CommandStartupViewModel.StartupOptionsProfiles.List[0];
+            CommandStartupViewModel.StartupOptionsProfiles.Profile =
+                CommandStartupViewModel.StartupOptionsProfiles.List.FirstOrDefault(); //Maybe use it as vm feature?
         }
 
         private static ConnectionOptions ConstructConnectionOptions(string Name,

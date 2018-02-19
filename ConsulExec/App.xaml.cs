@@ -18,7 +18,7 @@ namespace ConsulExec
         {
             base.OnStartup(E);
 
-            container = new Container(new RuntimeRegistry(TryLoadConfiguration()));
+            container = new Container(new RuntimeRegistry());
 
             var dependencyResolver = new StructureMapToSplatLocatorAdapter(container, Locator.Current);
             Locator.Current = dependencyResolver;
@@ -27,7 +27,7 @@ namespace ConsulExec
 
             container.Configure(x => x.For<IViewLocator>().ClearAll().Use<ConventionalViewLocator>().Singleton());
 
-            //container.Configure(x => x.For<Configuration>().Use());
+            container.Configure(x => x.For<Configuration>().Use(TryLoadConfiguration()));
 
             this.Log().Info("Started");
 

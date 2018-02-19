@@ -21,6 +21,7 @@ namespace ConsulExec.Domain
 
             Nodes = Observable.Create<string[]>(async (o, ct) =>
             {
+                await Task.Yield();
                 using (var client = await CreateClientAsync())
                 {
                     while (!ct.IsCancellationRequested)

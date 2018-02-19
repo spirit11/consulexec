@@ -9,7 +9,7 @@ namespace ConsulExec.Tests.EndToEnd
     public class IntegrationTests : AssertionHelper
     {
         [Test]
-        public void CheckConfiguration()
+        public void ViewModelsCollectionsAreInSyncWithModelConfiguration()
         {
             var container = new Container(new RuntimeRegistry());
             var vm = container.GetInstance<CommandStartupViewModel>();
