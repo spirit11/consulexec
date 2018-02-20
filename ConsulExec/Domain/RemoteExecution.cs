@@ -21,13 +21,21 @@ namespace ConsulExec.Domain
 
             Nodes = Observable.Create<string[]>(async (o, ct) =>
             {
-                await Task.Yield();
                 using (var client = await CreateClientAsync())
                 {
                     while (!ct.IsCancellationRequested)
                     {
                         Debug.WriteLine($"requesting nodes from {address}");
-                        var nodes = await client.Agent.Members(false, ct);
+                        QueryResult<AgentMember[]> nodes;
+                        try
+                        {
+                            nodes = await client.Agent.Members(false, ct);
+                        }
+                        catch (Exception)
+                        {
+                            o.OnNext(Array.Empty<string>());
+                            throw;
+                        }
                         Debug.WriteLine($"request to {address} completed");
                         /*
                      

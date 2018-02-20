@@ -1,5 +1,6 @@
 ﻿using ReactiveUI;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
@@ -47,6 +48,7 @@ namespace ConsulExec.ViewModel
                 .Do(_ => Nodes.Where(n => !n.IsChecked).ToList().ForEach(node => Nodes.Remove(node)))
                 .SelectNSwitch(v => v.Create().Nodes)
                 .StartWith(new[] { Array.Empty<string>() }) // initial values until first request is completed
+                .ObserveOn(RxApp.MainThreadScheduler) //prevent Nodes modification on pool thread
                 .Subscribe(names =>
                 {
                     var absentNames = Nodes.ToDictionary(n => n.Name, n => n);
@@ -63,11 +65,26 @@ namespace ConsulExec.ViewModel
                     foreach (var node in absentNames.Values)
                         node.IsAbsent = true;
                 });
+
+            filteredNodes = this.WhenAnyValue(v => v.NodesFilter)
+                .Throttle(TimeSpan.FromMilliseconds(100))
+                .Select(pattern => Nodes.CreateDerivedCollection(node => node, node => NodeNameMatches(node, pattern), scheduler: RxApp.MainThreadScheduler))
+                .ToProperty(this, v => v.FilteredNodes);
         }
 
         public IProfilesViewModel<ConnectionOptionsViewModel> Connections { get; }
 
         public ObservableCollection<NodeSelectorViewModel> Nodes { get; private set; } = new ObservableCollection<NodeSelectorViewModel>();
+
+        public string NodesFilter
+        {
+            get { return nodesFilter; }
+            set { this.RaiseAndSetIfChanged(ref nodesFilter, value); }
+        }
+        private string nodesFilter = "";
+
+        public IEnumerable<NodeSelectorViewModel> FilteredNodes => filteredNodes.Value;
+        private readonly ObservableAsPropertyHelper<IEnumerable<NodeSelectorViewModel>> filteredNodes;
 
         public string Name { get { return name; } set { this.RaiseAndSetIfChanged(ref name, value); } }
         private string name;
@@ -82,6 +99,9 @@ namespace ConsulExec.ViewModel
             namesSubscription.Dispose();
             base.OnDeactivate(Canceled);
         }
+
+        private static bool NodeNameMatches(NodeSelectorViewModel Node, string Pattern) =>
+            Node.Name.ToLower().Contains(Pattern.ToLower());
 
         private readonly IDisposable namesSubscription;
         private readonly StartupOptions options;

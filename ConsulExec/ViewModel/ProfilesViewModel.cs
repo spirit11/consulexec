@@ -11,6 +11,10 @@ namespace ConsulExec.ViewModel
     {
         ReactiveList<T> List { get; }
         T Profile { get; set; }
+
+        ICommand AddCommand { get; }
+        ICommand DeleteCommand { get; }
+        ICommand EditCommand { get; }
     }
 
 
