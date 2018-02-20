@@ -9,7 +9,9 @@
              d:DataContext="{d:DesignInstance vm:ConnectionOptionsEditorViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="300" d:DesignWidth="300">
     <DockPanel>
+        <Label Content="Connection Name:" DockPanel.Dock="Top"/>
         <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Top"/>
+        <Label Content="Server Address:" DockPanel.Dock="Top"/>
         <TextBox Text="{Binding ServerAddress, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Top"/>
 
         <UniformGrid Margin="10,0,10,10" Rows="1" Height="45" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">

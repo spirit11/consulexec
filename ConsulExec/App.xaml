@@ -1,20 +1,24 @@
 ﻿<Application x:Class="ConsulExec.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:v="clr-namespace:ConsulExec.View"
+             xmlns:view="clr-namespace:ConsulExec.View"
              xmlns:vm="clr-namespace:ConsulExec.ViewModel">
     <Application.Resources>
-        <DataTemplate DataType="{x:Type vm:CommandStartupViewModel}">
-            <v:CommandStartupView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:StartupOptionsEditorViewModel}">
-            <v:StartupOptionsEditorView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:NodeRunViewModel}">
-            <v:NodeRunView/>
-        </DataTemplate>
-        <!--<DataTemplate DataType="{x:Type vm:CommandRunViewModel}">
-            <v:CommandRunView/>
-        </DataTemplate>-->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Blue.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <DataTemplate DataType="{x:Type vm:NodeRunViewModel}">
+                <view:NodeRunView/>
+            </DataTemplate>
+            <Style x:Key="AccentBorderStyle" TargetType="Control">
+                <Setter Property="BorderBrush" Value="{DynamicResource AccentColorBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

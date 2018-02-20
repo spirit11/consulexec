@@ -1,4 +1,5 @@
-﻿<Window x:Class="ConsulExec.MainWindow"
+﻿<metro:MetroWindow x:Class="ConsulExec.MainWindow"
+        xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,9 +8,12 @@
         xmlns:reactiveUi="http://reactiveui.net"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance  d:Type={x:Type vm:MainWindowViewModel}}"
-        Title="{Binding Title}" Height="350" Width="525">
-    <reactiveUi:ViewModelViewHost 
+        Style="{StaticResource AccentBorderStyle}"
+        Title="{Binding Title}" 
+        Height="350" Width="525"
+        WindowStartupLocation="CenterScreen">
+    <reactiveUi:ViewModelViewHost Margin="4"
         VerticalContentAlignment="Stretch"
          HorizontalContentAlignment="Stretch"
         VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ViewModel="{Binding Content}"/>
-</Window>
+</metro:MetroWindow>

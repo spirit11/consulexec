@@ -10,8 +10,8 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="11*"/>
-            <ColumnDefinition Width="19*"/>
+            <ColumnDefinition Width="Auto" MinWidth="80"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <ListBox ItemsSource="{Binding NodeRuns}" SelectedItem="{Binding SelectedNodeRun}" Grid.ColumnSpan="1">
             <ListBox.ItemTemplate>
@@ -23,7 +23,9 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <ContentControl Grid.Column="1" Content="{Binding SelectedNodeRun}"/>
+        <ContentControl Grid.Column="1" 
+                        Style="{StaticResource AccentBorderStyle}"                        
+                        Content="{Binding SelectedNodeRun}"/>
         <Button Grid.Row="0" VerticalAlignment="Bottom" Content="Close" Command="{Binding CloseCommand}"/>
     </Grid>
 </UserControl>

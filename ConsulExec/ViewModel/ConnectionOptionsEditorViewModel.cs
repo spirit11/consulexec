@@ -13,7 +13,7 @@ namespace ConsulExec.ViewModel
             if (!ModeDetector.InDesignMode())
                 throw new InvalidOperationException("Design only constructor");
             Name = "Some name";
-            Name = "http://www.www.www";
+            ServerAddress = "http://www.www.www";
         }
 
         public ConnectionOptionsEditorViewModel(ProfileViewModel<ConnectionOptions> Options,
