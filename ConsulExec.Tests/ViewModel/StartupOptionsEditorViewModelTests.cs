@@ -68,14 +68,16 @@ namespace ConsulExec.Tests.ViewModel
 
             nodes.OnNext(new[] { "a", "b" });
             var v1 = Target.Nodes.ToArray();
+            Expect(v1.Length, Is.EqualTo(2));
 
             nodes.OnNext(new[] { "a", "b", "c" });
             var v2 = Target.Nodes.ToArray();
             Expect(v1, Is.EqualTo(v2.Take(2)));
+            Expect(v2.Length, Is.EqualTo(3));
 
             nodes.OnNext(new[] { "c", "a" });
 
-            Expect(Target.Nodes.Select(n => n.Name), EqualTo(new[] { "a", "b", "c" }));
+            Expect(NamesOf(Target.Nodes), EqualTo(new[] { "a", "b", "c" }));
             Expect(Target.Nodes.First(n => n.Name == "b").IsAbsent, Is.True);
         }
 
@@ -119,8 +121,11 @@ namespace ConsulExec.Tests.ViewModel
         }
 
 
-        private static IEnumerable<string> NamesOf(IEnumerable<NodeSelectorViewModel> TargetNodes) =>
-            TargetNodes.Select(n => n.Name);
+        private static IEnumerable<string> NamesOf(IEnumerable<NodeSelectorViewModel> TargetNodes)
+        {
+            DispatcherUtil.DoEvents();
+            return TargetNodes.Select(n => n.Name).ToArray();
+        }
 
         private class NodesRequestState
         {
@@ -171,9 +176,9 @@ namespace ConsulExec.Tests.ViewModel
             Expect(Target.Nodes.Where(n => absentNodeNames.Contains(n.Name)).Select(n => n.IsAbsent), All.True);
             Expect(Target.Nodes.Where(n => !absentNodeNames.Contains(n.Name)).Select(n => n.IsAbsent), All.False);
             nodes.OnNext(new string[0]);
-            Expect(Target.Nodes.Select(n => n.IsAbsent), All.True);
+            Expect(Target.Nodes.Select(n => n.IsAbsent).ToArray(), All.True);
             nodes.OnNext(nodeNames);
-            Expect(Target.Nodes.Select(n => n.IsAbsent), All.False);
+            Expect(Target.Nodes.Select(n => n.IsAbsent).ToArray(), All.False);
         }
 
         [Test]

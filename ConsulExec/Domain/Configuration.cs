@@ -14,7 +14,7 @@ namespace ConsulExec.Domain
 
         public List<string> MruCommands = new List<string>();
         public List<ConnectionOptions> Connections = new List<ConnectionOptions>();
-        public List<StartupOptions> Starup = new List<StartupOptions>();
+        public List<StartupOptions> Startups = new List<StartupOptions>();
 
         public void SaveTo(TextWriter Writer)
         {

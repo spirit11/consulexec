@@ -26,7 +26,7 @@ namespace ConsulExec.ViewModel
 
         public StartupOptionsEditorViewModel(
             ProfileViewModel<StartupOptions> Options,
-            IProfilesViewModel<ConnectionOptionsViewModel> Connections,
+            ConnectionProfilesViewModel Connections,
             IActivatingViewModel Activator) : base(Options, Activator)
         {
             AssertNotNull(Options, nameof(Options));
@@ -48,7 +48,7 @@ namespace ConsulExec.ViewModel
                 .Do(_ => Nodes.Where(n => !n.IsChecked).ToList().ForEach(node => Nodes.Remove(node)))
                 .SelectNSwitch(v => v.Create().Nodes)
                 .StartWith(new[] { Array.Empty<string>() }) // initial values until first request is completed
-                .ObserveOn(RxApp.MainThreadScheduler) //prevent Nodes modification on pool thread
+                //.ObserveOn(RxApp.MainThreadScheduler) //prevent Nodes modification on pool thread
                 .Subscribe(names =>
                 {
                     var absentNames = Nodes.ToDictionary(n => n.Name, n => n);
@@ -68,11 +68,13 @@ namespace ConsulExec.ViewModel
 
             filteredNodes = this.WhenAnyValue(v => v.NodesFilter)
                 .Throttle(TimeSpan.FromMilliseconds(100))
-                .Select(pattern => Nodes.CreateDerivedCollection(node => node, node => NodeNameMatches(node, pattern), scheduler: RxApp.MainThreadScheduler))
+                .Select(pattern => Nodes.CreateDerivedCollection(node => node, node => NodeNameMatches(node, pattern)
+                    //, scheduler: RxApp.MainThreadScheduler
+                ))
                 .ToProperty(this, v => v.FilteredNodes);
         }
 
-        public IProfilesViewModel<ConnectionOptionsViewModel> Connections { get; }
+        public ConnectionProfilesViewModel Connections { get; }
 
         public ObservableCollection<NodeSelectorViewModel> Nodes { get; private set; } = new ObservableCollection<NodeSelectorViewModel>();
 

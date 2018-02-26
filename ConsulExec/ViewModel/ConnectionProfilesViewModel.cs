@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Reactive.Linq;
 using ConsulExec.Domain;
 using ReactiveUI;
 
@@ -16,11 +16,18 @@ namespace ConsulExec.ViewModel
         public ConnectionProfilesViewModel(EditProfileDelegate EditProfile,
             UndoListViewModel UndoList,
             ReactiveList<ConnectionOptionsViewModel> Profiles,
+            Func<ConnectionOptions, int> RequestUsages = null,
             ConnectionOptionsFactoryDelegate ConnectionOptionsFactory = null)
             : base(EditProfile, UndoList, Profiles)
         {
             connectionOptionsFactory = ConnectionOptionsFactory ?? (newName => new ConnectionOptions { Name = newName });
+            var ru = RequestUsages ?? (v => -1);
+            deleteTooltip = this.WhenAnyValue(v => v.Profile)
+                .Select(profile => ru(profile?.Options).ToString()).ToProperty(this, vm => vm.DeleteTooltip);
         }
+
+        public string DeleteTooltip => deleteTooltip.Value;
+        private readonly ObservableAsPropertyHelper<string> deleteTooltip;
 
         protected override ConnectionOptionsViewModel CreateProfile(string NewName) =>
             ProfileViewModelsFactory.Create(connectionOptionsFactory(NewName));

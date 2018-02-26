@@ -23,7 +23,7 @@ namespace ConsulExec.Tests.EndToEnd
                 new ProfileViewModel<StartupOptions>(new SequentialStartupOptions(new string[0]), v => v.Name));
 
             Expect(container.GetInstance<Configuration>().Connections.Count, EqualTo(1));
-            Expect(container.GetInstance<Configuration>().Starup.Count, EqualTo(1));
+            Expect(container.GetInstance<Configuration>().Startups.Count, EqualTo(1));
         }
     }
 }

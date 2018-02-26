@@ -1,35 +1,58 @@
 ﻿using System;
 using ConsulExec.Domain;
-using ReactiveUI;
+
 
 namespace ConsulExec.ViewModel
 {
-    public interface IEditorsFactory
+    public interface IEditStartupFactory
     {
         void EditStartupOptions(ProfileViewModel<StartupOptions> Profile, Action<IProfileEditorViewModel<ProfileViewModel<StartupOptions>>> EditorSetup);
+    }
+
+
+    public interface IEditConnectionFactory
+    {
         void EditConnectionOptions(ProfileViewModel<ConnectionOptions> Profile, Action<IProfileEditorViewModel<ProfileViewModel<ConnectionOptions>>> EditorSetup);
     }
 
-    public class EditorsFactory : IEditorsFactory
+
+    public class EditStartupFactory : IEditStartupFactory
     {
-        public EditorsFactory(IActivatingViewModel ActivatingViewModel,
-            ReactiveList<ProfileViewModel<ConnectionOptions>> ConnectionsList,
-            UndoListViewModel UndoList,
-            ConnectionOptionsFactoryDelegate ConnectionConnectionOptionsFabric)
+        public EditStartupFactory(IActivatingViewModel ActivatingViewModel,
+            ConnectionProfilesViewModel ConnectionProfilesViewModel)
         {
             activatingViewModel = ActivatingViewModel;
-            connectionsList = ConnectionsList;
-            undoList = UndoList;
-            connectionConnectionOptionsFabric = ConnectionConnectionOptionsFabric;
+            connectionProfilesViewModel = ConnectionProfilesViewModel;
         }
 
         public void EditStartupOptions(ProfileViewModel<StartupOptions> Profile, Action<IProfileEditorViewModel<ProfileViewModel<StartupOptions>>> EditorSetup)
         {
             Activate(EditorSetup,
                 new StartupOptionsEditorViewModel(Profile,
-                    new ConnectionProfilesViewModel(EditConnectionOptions, undoList, connectionsList, connectionConnectionOptionsFabric),
+                    connectionProfilesViewModel,
                     activatingViewModel
             ));
+        }
+
+        private readonly IActivatingViewModel activatingViewModel;
+        private readonly ConnectionProfilesViewModel connectionProfilesViewModel;
+
+        private void Activate<T>(Action<IProfileEditorViewModel<ProfileViewModel<T>>> Setup,
+            IProfileEditorViewModel<ProfileViewModel<T>> ProfileEditorViewModel)
+        {
+            Setup(ProfileEditorViewModel);
+            activatingViewModel?.Activate(ProfileEditorViewModel);
+        }
+    }
+
+
+    public class EditConnectionFactory :  IEditConnectionFactory
+    {
+        public EditConnectionFactory(IActivatingViewModel ActivatingViewModel,
+            ConnectionOptionsFactoryDelegate ConnectionConnectionOptionsFabric)
+        {
+            activatingViewModel = ActivatingViewModel;
+            connectionConnectionOptionsFabric = ConnectionConnectionOptionsFabric;
         }
 
         public void EditConnectionOptions(ProfileViewModel<ConnectionOptions> Profile, Action<IProfileEditorViewModel<ProfileViewModel<ConnectionOptions>>> EditorSetup)
@@ -38,8 +61,6 @@ namespace ConsulExec.ViewModel
         }
 
         private readonly IActivatingViewModel activatingViewModel;
-        private readonly ReactiveList<ProfileViewModel<ConnectionOptions>> connectionsList;
-        private readonly UndoListViewModel undoList;
         private readonly ConnectionOptionsFactoryDelegate connectionConnectionOptionsFabric;
 
         private void Activate<T>(Action<IProfileEditorViewModel<ProfileViewModel<T>>> Setup,

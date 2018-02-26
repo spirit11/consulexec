@@ -116,6 +116,7 @@
     <Compile Include="Infrastructure\ConfigurationTests.cs" />
     <Compile Include="ViewModel\DispatcherSetUpFixture.cs" />
     <Compile Include="ViewModel\NotificationHelper.cs" />
+    <Compile Include="ViewModel\ConnectionProfilesViewModelTests.cs" />
     <Compile Include="ViewModel\StartupOptionsEditorViewModelTests.cs" />
     <Compile Include="Infrastructure\CollectionSyncronizerTests.cs" />
     <Compile Include="ConsulServicesTests.cs" />

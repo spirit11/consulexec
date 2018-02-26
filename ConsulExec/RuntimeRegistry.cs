@@ -34,7 +34,8 @@ namespace ConsulExec
 
             For<ConnectionOptionsFactoryDelegate>().Use(сonnectionOptionsFactoryDelegate);
 
-            For<IEditorsFactory>().Use<EditorsFactory>();
+            For<IEditStartupFactory>().Use<EditStartupFactory>();
+            For<IEditConnectionFactory>().Use<EditConnectionFactory>();
 
             For<StartupOptionsFactoryDelegate>()
                 .Use(new StartupOptionsFactoryDelegate(Name => new SequentialStartupOptions(Array.Empty<string>()) { Name = Name }));
@@ -42,7 +43,9 @@ namespace ConsulExec
             ForConcreteType<ConnectionProfilesViewModel>()
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<ConnectionOptions>>.EditProfileDelegate>()
-                .Is(ctxt => ctxt.GetInstance<IEditorsFactory>().EditConnectionOptions);
+                .Is(ctxt => ctxt.GetInstance<IEditConnectionFactory>().EditConnectionOptions)
+                .Ctor<Func<ConnectionOptions, int>>()
+                .Is(ctxt => connection => ctxt.GetInstance<Configuration>().Startups.Count(s => s.Connection == connection));
 
             ForConcreteType<MainWindowViewModel>().Configure.Singleton();
 
@@ -52,7 +55,7 @@ namespace ConsulExec
             ForConcreteType<StartupOptionsProfilesViewModel>()
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate>()
-                .Is(ctxt => ctxt.GetInstance<IEditorsFactory>().EditStartupOptions);
+                .Is(ctxt => ctxt.GetInstance<IEditStartupFactory>().EditStartupOptions);
 
             var executeCommandHandler = For<Action<StartupOptions, string>>()
                 .Use(ctxt => StartCommand(ctxt));
@@ -69,7 +72,7 @@ namespace ConsulExec
         }
 
         private static void BindCollections(IContext Ctxt, ReactiveList<ProfileViewModel<StartupOptions>> List) =>
-            BindCollectionsImpl(Ctxt, List, ProfileViewModelsFactory.Create, c => c.Starup);
+            BindCollectionsImpl(Ctxt, List, ProfileViewModelsFactory.Create, c => c.Startups);
 
         private static void BindCollections(IContext Ctxt, ReactiveList<ProfileViewModel<ConnectionOptions>> List) =>
             BindCollectionsImpl(Ctxt, List, ProfileViewModelsFactory.Create, c => c.Connections);
