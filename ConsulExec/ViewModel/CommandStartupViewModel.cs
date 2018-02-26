@@ -14,7 +14,6 @@ namespace ConsulExec.ViewModel
             Action<StartupOptions, string> RunCommand,
             ReactiveList<CommandViewModel> RecentCommands = null)
         {
-            ConnectionProfiles = ConnectionProfilesViewModel;
             recentCommands = RecentCommands ?? new ReactiveList<CommandViewModel>();
             StartupOptionsProfiles = StartupOptionsProfilesViewModel;
 
@@ -50,8 +49,6 @@ namespace ConsulExec.ViewModel
 
         public IReactiveDerivedList<string> RecentCommands => recentCommands.CreateDerivedCollection(v => v.Command);
         private readonly ReactiveList<CommandViewModel> recentCommands;
-
-        public ConnectionProfilesViewModel ConnectionProfiles { get; }
 
         public StartupOptionsProfilesViewModel StartupOptionsProfiles { get; }
 

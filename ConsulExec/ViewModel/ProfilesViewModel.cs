@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Windows.Input;
 using ReactiveUI;
 using System.ComponentModel;
+using System.Reactive.Subjects;
 
 namespace ConsulExec.ViewModel
 {
@@ -29,7 +30,7 @@ namespace ConsulExec.ViewModel
         public ICommand EditCommand { get; }
         public ICommand UndoCommand => undoList.UndoCommand;
 
-        public T Profile
+        public virtual T Profile
         {
             get
             {
@@ -40,16 +41,18 @@ namespace ConsulExec.ViewModel
                 this.RaiseAndSetIfChanged(ref profile, value);
             }
         }
-
         private T profile;
 
         protected ProfilesViewModel(EditProfileDelegate EditProfile, UndoListViewModel UndoList, ReactiveList<T> Profiles)
         {
             undoList = UndoList;
             List = Profiles;
+            CanDelete = new BehaviorSubject<bool>(true);
+
             var startupOptionsNotNull = this.WhenAnyValue(v => v.Profile).Select(v => v != null);
 
-            DeleteCommand = ReactiveCommand.Create(() => RemoveProfile(Profile, true), startupOptionsNotNull);
+            DeleteCommand = ReactiveCommand.Create(() => RemoveProfile(Profile, true),
+                startupOptionsNotNull.CombineLatest(this.WhenAnyObservable(v => v.CanDelete), (v, b) => v && b));
 
             AddCommand = ReactiveCommand.Create(() =>
             {
@@ -74,6 +77,13 @@ namespace ConsulExec.ViewModel
                 EditProfile(editProfile, vm => vm.HandlingDelete(_ => RemoveProfile(editProfile, true)));
             }, startupOptionsNotNull);
         }
+
+        protected IObservable<bool> CanDelete
+        {
+            get { return canDelete; }
+            set { this.RaiseAndSetIfChanged(ref canDelete, value); }
+        }
+        private IObservable<bool> canDelete;
 
         protected abstract T CreateProfile(string NewName);
 

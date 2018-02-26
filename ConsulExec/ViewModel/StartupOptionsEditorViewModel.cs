@@ -123,6 +123,7 @@ namespace ConsulExec.ViewModel
                 .Select(n => new NodeSelectorViewModel(n) { IsChecked = true }));
 
             var connection = StartupOptions.Connection;
+            Connections.Owner = Options.Options;
             Connections.Profile = connection == null
                 ? null
                 : Connections.List.First(p => p.Options == connection); //TODO issue if no item in list - wrong place to handle

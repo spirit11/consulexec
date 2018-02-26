@@ -8,22 +8,25 @@ namespace ConsulExec.Tests.EndToEnd
     [TestFixture]
     public class IntegrationTests : AssertionHelper
     {
-        [Test]
-        public void ViewModelsCollectionsAreInSyncWithModelConfiguration()
+        [TestCase(3, 2)]
+        [TestCase(0, 2)]
+        [TestCase(2, 0)]
+        public void ViewModelsCollectionsAreInSyncWithModelConfiguration(int ConnectionsCount, int ProfilesCount)
         {
             var container = new Container(new RuntimeRegistry());
-            var vm = container.GetInstance<CommandStartupViewModel>();
-            vm.ConnectionProfiles.List.Clear();
-            vm.StartupOptionsProfiles.List.Clear();
+            var connections = container.GetInstance<ConnectionProfilesViewModel>();
+            var startups = container.GetInstance<StartupOptionsProfilesViewModel>();
 
-            vm.ConnectionProfiles.List.Add(
-                new ProfileViewModel<ConnectionOptions>(new ConnectionOptions(), v => v.Name));
+            connections.List.Clear();
+            for (int i = 0; i < ConnectionsCount; i++)
+                connections.List.Add(ProfileViewModelsFactory.Create(new ConnectionOptions()));
 
-            vm.StartupOptionsProfiles.List.Add(
-                new ProfileViewModel<StartupOptions>(new SequentialStartupOptions(new string[0]), v => v.Name));
+            startups.List.Clear();
+            for (int i = 0; i < ProfilesCount; i++)
+                startups.List.Add(ProfileViewModelsFactory.Create(new SequentialStartupOptions(new string[0])));
 
-            Expect(container.GetInstance<Configuration>().Connections.Count, EqualTo(1));
-            Expect(container.GetInstance<Configuration>().Startups.Count, EqualTo(1));
+            Expect(container.GetInstance<Configuration>().Connections.Count, EqualTo(ConnectionsCount));
+            Expect(container.GetInstance<Configuration>().Startups.Count, EqualTo(ProfilesCount));
         }
     }
 }

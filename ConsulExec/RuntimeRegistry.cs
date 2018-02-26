@@ -44,8 +44,9 @@ namespace ConsulExec
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<ConnectionOptions>>.EditProfileDelegate>()
                 .Is(ctxt => ctxt.GetInstance<IEditConnectionFactory>().EditConnectionOptions)
-                .Ctor<Func<ConnectionOptions, int>>()
-                .Is(ctxt => connection => ctxt.GetInstance<Configuration>().Startups.Count(s => s.Connection == connection));
+                .Ctor<RequestUsageDelegate>()
+                .Is(ctxt => (connection, owner) => ctxt.GetInstance<Configuration>().Startups.Count(s => s != owner && s.Connection == connection))
+                .Singleton();
 
             ForConcreteType<MainWindowViewModel>().Configure.Singleton();
 
@@ -55,7 +56,8 @@ namespace ConsulExec
             ForConcreteType<StartupOptionsProfilesViewModel>()
                 .Configure
                 .Ctor<ProfilesViewModel<ProfileViewModel<StartupOptions>>.EditProfileDelegate>()
-                .Is(ctxt => ctxt.GetInstance<IEditStartupFactory>().EditStartupOptions);
+                .Is(ctxt => ctxt.GetInstance<IEditStartupFactory>().EditStartupOptions)
+                .Singleton();
 
             var executeCommandHandler = For<Action<StartupOptions, string>>()
                 .Use(ctxt => StartCommand(ctxt));
@@ -117,10 +119,9 @@ namespace ConsulExec
 
                 var connectionOptions = ConstructConnectionOptions("node01", "http://192.168.1.101:8500", factory);
 
-                CommandStartupViewModel.ConnectionProfiles.List.Add(
-                    ProfileViewModelsFactory.Create(ConstructConnectionOptions("unexisting server", "http://serv1",
-                        factory)));
-                CommandStartupViewModel.ConnectionProfiles.List.Add(ProfileViewModelsFactory.Create(connectionOptions));
+                var connectionsList = Context.GetInstance<ConnectionProfilesViewModel>().List;
+                connectionsList.Add(ProfileViewModelsFactory.Create(ConstructConnectionOptions("unexisting server", "http://serv1", factory)));
+                connectionsList.Add(ProfileViewModelsFactory.Create(connectionOptions));
 
                 CommandStartupViewModel.StartupOptionsProfiles.List.Add(
                     ProfileViewModelsFactory.Create(
