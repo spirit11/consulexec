@@ -10,6 +10,7 @@ namespace ConsulExec.ViewModel
         void Deactivate(object ViewModel);
     }
 
+
     public class MainWindowViewModel : ReactiveObject, IActivatingViewModel
     {
         public string Title { get; } = "Consul Exec";
@@ -18,16 +19,17 @@ namespace ConsulExec.ViewModel
 
         public void Activate(object ViewModel)
         {
-            if (Content != null)
-                viewModels.Add(Content);
             Content = ViewModel;
+            viewModels.Add(Content);
             this.RaisePropertyChanged(nameof(Content));
         }
 
         public void Deactivate(object ViewModel)
         {
-            Content = viewModels.Last();
+            if (viewModels.Last() != ViewModel) //prevent double deactivation
+                return;
             viewModels.Remove(Content);
+            Content = viewModels.Last();
             this.RaisePropertyChanged(nameof(Content));
         }
 
