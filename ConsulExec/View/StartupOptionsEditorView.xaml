@@ -18,7 +18,8 @@
           
             <Label Content="Connection Profile:"/>
             <Button Command="{Binding EditCommand}" Content="Edit" DockPanel.Dock="Right"/>
-            <Button Command="{Binding DeleteCommand}" Content="Delete" DockPanel.Dock="Right" ToolTip="{Binding DeleteTooltip}"/>
+            <Button Command="{Binding DeleteCommand}" Content="Delete" DockPanel.Dock="Right" 
+                    ToolTip="{Binding DeleteTooltip}"  ToolTipService.ShowOnDisabled="True"/>
             <Button Command="{Binding AddCommand}" Content="Add" DockPanel.Dock="Right"/>
             <ComboBox ItemsSource="{Binding List}" SelectedItem="{Binding Profile}" DisplayMemberPath="Name" />
         </DockPanel>
