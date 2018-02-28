@@ -25,10 +25,10 @@ namespace ConsulExec.ViewModel
             : base(EditProfile, UndoList, Profiles)
         {
             connectionOptionsFactory = ConnectionOptionsFactory ?? (newName => new ConnectionOptions { Name = newName });
-            var request = RequestUsage ?? ((v, o) => -1);
+            var request = RequestUsage ?? ((v, o) => 0);
             var usages = this.WhenAnyValue(v => v.Profile)
                 .CombineLatest(forceRequest, (profile, _) => request(profile?.Options, Owner));
-            deleteTooltip = usages.Select(v => v.ToString()).ToProperty(this, vm => vm.DeleteTooltip);
+            deleteTooltip = usages.Select(v => $"Used in {v} other settings.").ToProperty(this, vm => vm.DeleteTooltip);
             CanDelete = usages.Select(u => u == 0);
         }
 

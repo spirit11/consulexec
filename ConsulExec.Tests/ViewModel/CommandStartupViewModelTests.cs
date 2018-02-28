@@ -19,13 +19,12 @@ namespace ConsulExec.Tests.ViewModel
         [Test]
         public void AddRecentCommandWhenExecuted()
         {
-            var target = new CommandStartupViewModel(new ConnectionProfilesViewModel(null, null, null),
-                new StartupOptionsProfilesViewModel(null, null, null, new ReactiveList<ProfileViewModel<StartupOptions>>()), (o, cmd) => { });
+            var target = new CommandStartupViewModel(new StartupOptionsProfilesViewModel(null, null, null, new ReactiveList<ProfileViewModel<StartupOptions>>()), (o, cmd) => { });
 
             target.ClearRecentCommands();
             target.Command = "42";
 
-            var notifications = new NotificationHelper<NotifyCollectionChangedEventArgs>(target.RecentCommands, 
+            var notifications = new NotificationHelper<NotifyCollectionChangedEventArgs>(target.RecentCommands,
                 nameof(INotifyCollectionChanged.CollectionChanged));
             using (notifications.Run())
             { }
@@ -42,6 +41,7 @@ namespace ConsulExec.Tests.ViewModel
             Expect(args.First().NewItems, EqualTo(new[] { "42" }));
 
             Expect(notifications.Senders, All.EqualTo(target.RecentCommands));
+            Expect(target.Command, EqualTo("42"));
         }
 
         [Test]
@@ -53,8 +53,7 @@ namespace ConsulExec.Tests.ViewModel
             {
                 Profile = ProfileViewModelsFactory.Create(options)
             };
-            var target = new CommandStartupViewModel(new ConnectionProfilesViewModel(null, null, null),
-                startupOptionsProfilesViewModel,
+            var target = new CommandStartupViewModel(startupOptionsProfilesViewModel,
                 (o, cmd) => cmds.Add(new { o, cmd }));
 
             target.ClearRecentCommands();

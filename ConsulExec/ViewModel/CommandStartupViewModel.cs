@@ -9,8 +9,7 @@ namespace ConsulExec.ViewModel
 {
     public class CommandStartupViewModel : ReactiveObject
     {
-        public CommandStartupViewModel(ConnectionProfilesViewModel ConnectionProfilesViewModel,
-            StartupOptionsProfilesViewModel StartupOptionsProfilesViewModel,
+        public CommandStartupViewModel(StartupOptionsProfilesViewModel StartupOptionsProfilesViewModel,
             Action<StartupOptions, string> RunCommand,
             ReactiveList<CommandViewModel> RecentCommands = null)
         {
@@ -26,7 +25,7 @@ namespace ConsulExec.ViewModel
                 if (recentCommands.Count > MaxRecentCommands)
                     recentCommands.RemoveRange(0, recentCommands.Count - MaxRecentCommands);
 
-                Command = command.Command;
+                Command = cmd.Command;
                 RunCommand?.Invoke(StartupOptionsProfiles.Profile.Options, cmd.Command);
             }, this.WhenAnyValue(v => v.Command, v => v.StartupOptionsProfiles.Profile, (cmd, opt) => !string.IsNullOrWhiteSpace(cmd) && opt != null));
 

@@ -1,7 +1,9 @@
-﻿using ReactiveUI;
+﻿using System.Diagnostics;
+using ReactiveUI;
 
 namespace ConsulExec.ViewModel
 {
+    [DebuggerDisplay("Node: {" + nameof(Name) + "} IsAbsent={" + nameof(IsAbsent) + "}")]
     public class NodeSelectorViewModel : ReactiveObject
     {
         public NodeSelectorViewModel(string Name)
