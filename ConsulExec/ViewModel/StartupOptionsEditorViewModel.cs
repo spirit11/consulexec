@@ -10,9 +10,6 @@ using Splat;
 
 namespace ConsulExec.ViewModel
 {
-    using ConnectionOptionsViewModel = ProfileViewModel<ConnectionOptions>;
-
-
     public class StartupOptionsEditorViewModel : BaseOptionsEditorViewModel<ProfileViewModel<StartupOptions>>
     {
         public StartupOptionsEditorViewModel() : base(null, null)
@@ -20,8 +17,13 @@ namespace ConsulExec.ViewModel
             if (!ModeDetector.InDesignMode())
                 throw new InvalidOperationException("Design only constructor");
             Name = "Some name";
-            Nodes.Add(new NodeSelectorViewModel("Avail"));
-            Nodes.Add(new NodeSelectorViewModel("Absent") { IsAbsent = true });
+
+            nodes = new ObservableCollection<NodeSelectorViewModel>
+            {
+                new NodeSelectorViewModel("Avail"),
+                new NodeSelectorViewModel("Absent") {IsAbsent = true}
+            };
+            filteredNodes = Observable.Return(nodes).ToProperty(this, v => v.FilteredNodes);
         }
 
         public StartupOptionsEditorViewModel(
@@ -45,17 +47,16 @@ namespace ConsulExec.ViewModel
             namesSubscription = Connections.WhenAnyValue(v => v.Profile)
                 .Where(v => v != null)
                 .SelectNSwitch(v => v.WhenAnyValue(o => o.Options))
-                .Do(_ => Nodes.Where(n => !n.IsChecked).ToList().ForEach(node => Nodes.Remove(node)))
                 .SelectNSwitch(v => v.Create().Nodes)
                 .StartWith(new[] { Array.Empty<string>() }) // initial values until first request is completed
-                //.ObserveOn(RxApp.MainThreadScheduler) //prevent Nodes modification on pool thread
+                                                            //.ObserveOn(RxApp.MainThreadScheduler) //prevent Nodes modification on pool thread
                 .Subscribe(names =>
                 {
-                    var absentNames = Nodes.ToDictionary(n => n.Name, n => n);
+                    var absentNames = nodes.ToDictionary(n => n.Name, n => n);
                     foreach (var nodeName in names.OrderBy(v => v))
                     {
                         if (!absentNames.ContainsKey(nodeName))
-                            Nodes.Add(new NodeSelectorViewModel(nodeName));
+                            nodes.Add(new NodeSelectorViewModel(nodeName));
                         else
                         {
                             absentNames[nodeName].IsAbsent = false;
@@ -63,20 +64,24 @@ namespace ConsulExec.ViewModel
                         }
                     }
                     foreach (var node in absentNames.Values)
-                        node.IsAbsent = true;
+                        if (node.IsChecked)
+                            node.IsAbsent = true;
+                        else
+                            nodes.Remove(node);
                 });
 
             filteredNodes = this.WhenAnyValue(v => v.NodesFilter)
                 .Throttle(TimeSpan.FromMilliseconds(100))
-                .Select(pattern => Nodes.CreateDerivedCollection(node => node, node => NodeNameMatches(node, pattern)
-                    //, scheduler: RxApp.MainThreadScheduler
+                .Select(pattern => nodes.CreateDerivedCollection(node => node, node => NodeNameMatches(node, pattern)
+                //, scheduler: RxApp.MainThreadScheduler
                 ))
-                .ToProperty(this, v => v.FilteredNodes);
+                .ToProperty(this, v => v.FilteredNodes, nodes);
         }
 
         public ConnectionProfilesViewModel Connections { get; }
 
-        public ObservableCollection<NodeSelectorViewModel> Nodes { get; private set; } = new ObservableCollection<NodeSelectorViewModel>();
+        public IEnumerable<NodeSelectorViewModel> Nodes => filteredNodes.Value;
+        private ObservableCollection<NodeSelectorViewModel> nodes;
 
         public string NodesFilter
         {
@@ -111,14 +116,14 @@ namespace ConsulExec.ViewModel
         private void MapBack(StartupOptions StartupOptions)
         {
             StartupOptions.Name = Name;
-            ((SequentialStartupOptions)StartupOptions).SetNodes(Nodes.Where(n => n.IsChecked).Select(n => n.Name).ToArray());
+            ((SequentialStartupOptions)StartupOptions).SetNodes(nodes.Where(n => n.IsChecked).Select(n => n.Name).ToArray());
             StartupOptions.Connection = Connections.Profile?.Options;
         }
 
         private void Map(StartupOptions StartupOptions)
         {
             Name = StartupOptions.Name;
-            Nodes = new ObservableCollection<NodeSelectorViewModel>(
+            nodes = new ObservableCollection<NodeSelectorViewModel>(
                 (StartupOptions.Nodes ?? Enumerable.Empty<string>())
                 .Select(n => new NodeSelectorViewModel(n) { IsChecked = true }));
 

@@ -68,7 +68,6 @@ namespace ConsulExec.ViewModel
             {
                 this.NodeName = NodeName;
             }
-            public NodeExecutionTask Task { get; }
             public string NodeName { get; }
             public IObservable<string> Output { get; } = Observable.Never<string>();
             public IObservable<int> ReturnCode { get; } = Observable.Never<int>();

@@ -5,15 +5,13 @@ namespace ConsulExec.Domain
 {
     class TaskRun : ITaskRun
     {
-        public TaskRun(NodeExecutionTask Task, string NodeName)
+        public TaskRun(string NodeName)
         {
-            this.Task = Task;
             this.NodeName = NodeName;
         }
 
         #region ITaskRun
 
-        public NodeExecutionTask Task { get; }
 
         public string NodeName { get; }
 

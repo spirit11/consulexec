@@ -189,7 +189,7 @@ namespace ConsulExec.Domain
                     }
                     else
                     {
-                        var taskRun = new TaskRun(ExecutionTask, ackNode);
+                        var taskRun = new TaskRun(ackNode);
                         Observer.OnNext(taskRun);
                         nodes[ackNode] = taskRun;
                     }

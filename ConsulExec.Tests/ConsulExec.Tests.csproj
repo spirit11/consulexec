@@ -110,6 +110,7 @@
     <Compile Include="EndToEnd\EndToEndTests.cs" />
     <Compile Include="EndToEnd\IntegrationTests.cs" />
     <Compile Include="Infrastructure\TestClassTemplate.cs" />
+    <Compile Include="ObjectToObjectConverterTests.cs" />
     <Compile Include="Util\CollectionProperties.cs" />
     <Compile Include="Infrastructure\RetryPatternsTests.cs" />
     <Compile Include="Infrastructure\DictionaryExtensionsTests.cs" />

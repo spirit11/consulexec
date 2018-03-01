@@ -14,11 +14,32 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <ListBox ItemsSource="{Binding NodeRuns}" SelectedItem="{Binding SelectedNodeRun}" Grid.ColumnSpan="1">
+            <ListBox.Resources>
+                <local:ObjectToObjectConverter x:Key="converter" x:Shared="False">
+                    <local:MapValues Source="Waiting">
+                        <local:MapValues.Target>
+                            <Image Source="/Resources/timer.png" Stretch="Uniform"/>
+                        </local:MapValues.Target>
+                    </local:MapValues>
+                    <local:MapValues Source="Writing">
+                        <local:MapValues.Target>
+                            <Image Source="/Resources/edit.png" Stretch="Uniform"/>
+                        </local:MapValues.Target>
+                    </local:MapValues>
+                    <local:MapValues Source="Completed">
+                        <local:MapValues.Target>
+                            <Image Source="/Resources/ok.png" Stretch="Uniform"/>
+                        </local:MapValues.Target>
+                    </local:MapValues>
+                </local:ObjectToObjectConverter>
+            </ListBox.Resources>
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <DockPanel>
-                        <ContentControl Content="{Binding State}" Margin="4"/>
-                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                        <Viewbox VerticalAlignment="Stretch" Height="{Binding ElementName=tb,Path=ActualHeight}">
+                            <ContentControl Content="{Binding State, Converter={StaticResource converter}}" Margin="4"/>
+                        </Viewbox>
+                        <TextBlock Name="tb" Text="{Binding Name}" VerticalAlignment="Center"/>
                     </DockPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
@@ -29,3 +50,6 @@
         <Button Grid.Row="0" VerticalAlignment="Bottom" Content="Close" Command="{Binding CloseCommand}"/>
     </Grid>
 </UserControl>
+
+
+

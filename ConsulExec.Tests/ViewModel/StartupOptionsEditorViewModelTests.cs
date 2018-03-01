@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using ConsulExec.Domain;
 using ConsulExec.ViewModel;
 using Moq;
@@ -72,9 +73,10 @@ namespace ConsulExec.Tests.ViewModel
 
             nodes.OnNext(new[] { "a", "b", "c" });
             var v2 = Target.Nodes.ToArray();
-            Expect(v1, Is.EqualTo(v2.Take(2)));
             Expect(v2.Length, Is.EqualTo(3));
+            Expect(v1.Select(n => n.Name), Is.EqualTo(v2.Take(2).Select(n => n.Name)));
 
+            Target.Nodes.First(n => n.Name == "b").IsChecked = true;
             nodes.OnNext(new[] { "c", "a" });
 
             Expect(NamesOf(Target.Nodes), EqualTo(new[] { "a", "b", "c" }));
@@ -123,7 +125,6 @@ namespace ConsulExec.Tests.ViewModel
 
         private static IEnumerable<string> NamesOf(IEnumerable<NodeSelectorViewModel> TargetNodes)
         {
-            DispatcherUtil.DoEvents();
             return TargetNodes.Select(n => n.Name).ToArray();
         }
 

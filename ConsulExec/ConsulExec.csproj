@@ -132,6 +132,7 @@
     <Compile Include="Infrastructure\ObservableExt.cs" />
     <Compile Include="Infrastructure\RetryPatterns.cs" />
     <Compile Include="Infrastructure\TaskExtensions.cs" />
+    <Compile Include="View\ObjectToObjectConverter.cs" />
     <Compile Include="RuntimeRegistry.cs" />
     <Compile Include="StructureMapToSplatLocatorAdapter.cs" />
     <Compile Include="ViewModel\BaseOptionsEditorViewModel.cs" />
@@ -232,6 +233,11 @@
     </None>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\edit.png" />
+    <Resource Include="Resources\ok.png" />
+    <Resource Include="Resources\timer.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
