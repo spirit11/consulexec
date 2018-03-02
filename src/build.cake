@@ -35,6 +35,7 @@ Task("Pack")
 
   
 Task("AppVeyor")
+  .IsDependentOn("NugetRestore")
   .IsDependentOn("Pack")
   .Does(()=>{
 	  
