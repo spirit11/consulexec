@@ -15,6 +15,18 @@ Task("Test")
 	NUnit3(assemblies);
 });
 
+
+Task("NugetRestore")
+  .Does(()=>{
+	var solutions = GetFiles("./**/*.sln");
+	foreach(var solution in solutions)
+	{
+		Information("Restoring {0}", solution);
+		NuGetRestore(solution);
+	}
+  });
+
+
 Task("Pack")
   .IsDependentOn("Test")
   .Does(()=>{
