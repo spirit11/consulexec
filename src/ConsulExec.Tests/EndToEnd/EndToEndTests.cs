@@ -12,10 +12,11 @@ namespace ConsulExec.Tests.EndToEnd
         [OneTimeSetUp]
         public void SetUp()
         {
-            File.WriteAllText(ConsulConfigFileName, ConfigFileContent);
             var consulExecutable = ConfigurationManager.AppSettings["ConsulExecutable"] ??
                                    Path.Combine(TestContext.CurrentContext.TestDirectory, "consul.exe");
-            Expect(File.Exists(consulExecutable), True, "Can't find consul.exe. Add path to consul.exe under ConsulExecutable key in app.config.");
+            Assume.That(File.Exists(consulExecutable), True, "Can't find consul.exe. Add path to consul.exe under ConsulExecutable key in app.config.");
+
+            File.WriteAllText(ConsulConfigFileName, ConfigFileContent);
             var arguments = $"agent -dev -config-file=\"{ConsulConfigFileName}\" -http-port={HttpApiPort}";
             consulProcess = Process.Start(consulExecutable, arguments);
         }
@@ -24,7 +25,7 @@ namespace ConsulExec.Tests.EndToEnd
         public void TearDown()
         {
             File.Delete(ConsulConfigFileName);
-            consulProcess.Kill();
+            consulProcess?.Kill();
         }
 
         [Test]

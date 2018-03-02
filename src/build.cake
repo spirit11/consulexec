@@ -33,4 +33,11 @@ Task("Pack")
 	 ChocolateyPack("nuspec/consulexec.nuspec", new ChocolateyPackSettings { Version = "0.0.0.1"} );
   });
 
+  
+Task("AppVeyor")
+  .IsDependentOn("Pack")
+  .Does(()=>{
+	  
+  });
+
 RunTarget(target);
