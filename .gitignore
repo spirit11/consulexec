@@ -241,7 +241,3 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 /tools
-/cake.config
-/cake.bat
-/build.ps1
-/build.cake

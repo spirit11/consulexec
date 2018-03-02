@@ -103,8 +103,11 @@ namespace ConsulExec
                 );
             };
 
+        private static void FillTestData(IContext Context, CommandStartupViewModel CommandStartupViewModel) =>
+            FillTestDataImpl(Context, CommandStartupViewModel);
+
         [Conditional("DEBUG")]
-        private static void FillTestData(IContext Context, CommandStartupViewModel CommandStartupViewModel)
+        private static void FillTestDataImpl(IContext Context, CommandStartupViewModel CommandStartupViewModel)
         {
             // don't add test data if some values are loaded from config
             if (!Context.GetInstance<Configuration>().Connections.Any())

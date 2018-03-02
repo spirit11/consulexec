@@ -61,7 +61,6 @@ namespace ConsulExec.Tests.Infrastructure
         [Test]
         public void WhenViewModelsAreRemovedModelsSync()
         {
-            ;
             foreach (var position in new[] { viewModels.Count - 1, 0, 1 }) // last, first, center
             {
                 viewModels.RemoveAt(position);

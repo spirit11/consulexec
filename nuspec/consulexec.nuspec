@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>ConsulExec</id>
+    <version>$version$</version>
+    <title>ConsulExec</title>
+    <authors>Me</authors>
+    <owners>Me</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>desc</description>
+    <summary>ConsulExec package</summary>
+  </metadata>
+  <files>
+    <file src="..\ConsulExec\bin\Release\*.dll" target="tools" />
+    <file src="..\ConsulExec\bin\Release\*.exe" target="tools" />
+  </files>
+</package>

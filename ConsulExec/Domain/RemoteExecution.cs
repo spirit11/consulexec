@@ -212,8 +212,8 @@ namespace ConsulExec.Domain
             private readonly Dictionary<NodeExecutionTask, Dictionary<string, TaskRun>> taskruns =
                 new Dictionary<NodeExecutionTask, Dictionary<string, TaskRun>>();
 
-            private Task<T> RetryPolicy<T>(Func<Task<T>> Func) => RetryPatterns.Retry(Func, Token, TimeSpan.FromSeconds(1));
-            private Task RetryPolicy(Func<Task> Func) => RetryPatterns.Retry(Func, Token, TimeSpan.FromSeconds(1));
+            private Task<T> RetryPolicy<T>(Func<Task<T>> Func) => Func.Retry(Token, TimeSpan.FromSeconds(1));
+            private Task RetryPolicy(Func<Task> Func) => Func.Retry(Token, TimeSpan.FromSeconds(1));
 
             private IDictionary<string, TaskRun> GetNodesForTask(NodeExecutionTask SessionKey) => taskruns.GetOrAdd(SessionKey);
         }
