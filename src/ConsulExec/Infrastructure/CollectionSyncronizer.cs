@@ -134,7 +134,7 @@ namespace ConsulExec.Infrastructure
                 var vm = (TVM)Sender;
                 var newModel = modelProperty(vm);
                 modelCollection[viewModelCollection.TakeWhile(vc => !vc.Equals(vm)).Count()] = newModel;
-            };
+            }
         }
     }
 }

@@ -55,8 +55,7 @@ namespace ConsulExec.Infrastructure
                     {
                         foreach (var t in bc.GetConsumingEnumerable(ct))
                         {
-                            var r = default(TR);
-                            r = ResultSelector(t);
+                            var r = ResultSelector(t);
                             o.OnNext(r);
                             ContinuationSelector(r).Wait();
                         }
