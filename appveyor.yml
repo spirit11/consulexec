@@ -5,3 +5,8 @@ build_script:
 
     .\build.ps1 -target AppVeyor
 test: off
+artifacts:
+- path: src\*.nupkg
+  name: nupkg
+- path: '**\TestResult.xml'
+  name: test results
