@@ -13,3 +13,4 @@ artifacts:
 
 cache:
 - src\packages -> src\**\packages.config
+- src\tools -> build.cake
