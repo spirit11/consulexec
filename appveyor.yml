@@ -10,3 +10,6 @@ artifacts:
   name: nupkg
 - path: '**\TestResult.xml'
   name: test results
+
+cache:
+- src\packages -> src\**\packages.config
