@@ -30,7 +30,7 @@ Task("NugetRestore")
 Task("Pack")
   .IsDependentOn("Test")
   .Does(()=>{
-	 ChocolateyPack("nuspec/consulexec.nuspec", new ChocolateyPackSettings { Version = "0.0.0.1"} );
+	 ChocolateyPack("nuspec/consulexec.nuspec", new ChocolateyPackSettings { Version = EnvironmentVariable("APPVEYOR_BUILD_VERSION") ?? "1.0.0.0" } );
   });
 
   
