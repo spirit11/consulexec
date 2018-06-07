@@ -11,7 +11,7 @@ Task("Build")
 Task("Test")
   .IsDependentOn("Build")
   .Does(()=>{	  
-	var assemblies = GetFiles($"./*.Tests/bin/{configuration}/*Test*.dll");
+	var assemblies = GetFiles($"./*.Tests/bin/{configuration}/*Tests*.dll");
 	NUnit3(assemblies);
 });
 
